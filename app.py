@@ -189,7 +189,14 @@ def run_gui():
     from PySide6.QtWidgets import QApplication
     from ui.main_window import LyricForgeWindow
     
+    from PySide6.QtGui import QFont
     app = QApplication(sys.argv)
+    
+    # Set explicit font to prevent QFont pointSize <= 0 warnings
+    app_font = QFont("Cantarell", 10)
+    app_font.setStyleHint(QFont.SansSerif)
+    app.setFont(app_font)
+
     window = LyricForgeWindow()
     window.show()
     sys.exit(app.exec())
