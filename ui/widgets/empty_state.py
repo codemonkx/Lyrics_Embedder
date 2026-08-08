@@ -3,12 +3,12 @@ from PySide6.QtWidgets import (
     QFrame, QVBoxLayout, QLabel, QPushButton
 )
 from ui.theme import (
-    BG_ELEVATED, BORDER_SUBTLE, TEXT_PRIMARY, TEXT_SECONDARY
+    BG_CARD, BORDER_SUBTLE, TEXT_PRIMARY, TEXT_SECONDARY, ACCENT_RED
 )
 
 class GNOMEEmptyState(QFrame):
     """
-    GNOME-style empty state container widget.
+    Nothing OS-style empty state container widget.
     """
     action_clicked = Signal()
 
@@ -18,9 +18,9 @@ class GNOMEEmptyState(QFrame):
         self.setAttribute(Qt.WA_StyledBackground, True)
         self.setStyleSheet(f"""
             QFrame#emptyStateOverlay {{
-                background-color: {BG_ELEVATED};
+                background-color: {BG_CARD};
                 border: 1px solid {BORDER_SUBTLE};
-                border-radius: 8px;
+                border-radius: 10px;
             }}
             QLabel {{ border: none; background: transparent; }}
         """)
@@ -31,14 +31,14 @@ class GNOMEEmptyState(QFrame):
         layout.setAlignment(Qt.AlignCenter)
 
         # Icon Symbol
-        lbl_icon = QLabel(icon_symbol)
-        lbl_icon.setStyleSheet("font-size: 32pt; color: #5e5c64; background: transparent;")
+        lbl_icon = QLabel("🔴")
+        lbl_icon.setStyleSheet(f"font-size: 32pt; color: {ACCENT_RED}; background: transparent;")
         lbl_icon.setAlignment(Qt.AlignCenter)
         layout.addWidget(lbl_icon)
 
-        # Title
-        self.lbl_title = QLabel(title)
-        self.lbl_title.setStyleSheet(f"font-size: 12pt; font-weight: 700; color: {TEXT_PRIMARY};")
+        # Title (Nothing OS Style)
+        self.lbl_title = QLabel(f":: {title.upper()} ::")
+        self.lbl_title.setStyleSheet(f"font-size: 11pt; font-weight: 900; color: {TEXT_PRIMARY}; letter-spacing: 1.5px;")
         self.lbl_title.setAlignment(Qt.AlignCenter)
         layout.addWidget(self.lbl_title)
 
@@ -51,7 +51,7 @@ class GNOMEEmptyState(QFrame):
         layout.addWidget(self.lbl_desc)
 
         # Action Button
-        self.btn_action = QPushButton(button_text)
+        self.btn_action = QPushButton(button_text.upper() if button_text else "")
         self.btn_action.setObjectName("primaryButton")
         self.btn_action.setMinimumHeight(32)
         self.btn_action.clicked.connect(self.action_clicked.emit)

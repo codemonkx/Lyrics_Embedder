@@ -6,13 +6,13 @@ from PySide6.QtWidgets import (
 from PySide6.QtGui import QIcon
 
 from ui.theme import (
-    BG_SURFACE, BORDER_SUBTLE, TEXT_PRIMARY, TEXT_SECONDARY, ACCENT_BLUE
+    BG_SURFACE, BORDER_SUBTLE, TEXT_PRIMARY, TEXT_SECONDARY, ACCENT_RED
 )
 from ui.widgets.about_dialog import GNOMEAboutDialog
 
 class GNOMEHeaderBar(QFrame):
     """
-    Adwaita-style HeaderBar component with Libadwaita ViewSwitcher, search filter, Hamburger menu, and window controls.
+    Nothing OS-style HeaderBar component with Libadwaita ViewSwitcher, search filter, Hamburger menu, and window controls.
     """
     page_changed = Signal(int)
     search_changed = Signal(str)
@@ -36,31 +36,26 @@ class GNOMEHeaderBar(QFrame):
         layout.setContentsMargins(16, 0, 16, 0)
         layout.setSpacing(12)
 
-        # 1. Left Section: Logo & App Title
-        logo_icon_lbl = QLabel()
-        icon_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "assets", "app_icon.png")
-        if os.path.exists(icon_path):
-            logo_icon_lbl.setPixmap(QIcon(icon_path).pixmap(24, 24))
-        else:
-            logo_icon_lbl.setText("🎵")
-            logo_icon_lbl.setStyleSheet("font-size: 14pt;")
-        layout.addWidget(logo_icon_lbl)
+        # 1. Left Section: Red LED Dot & Nothing Title
+        lbl_red_dot = QLabel("🔴")
+        lbl_red_dot.setStyleSheet(f"font-size: 10pt; color: {ACCENT_RED}; border: none;")
+        layout.addWidget(lbl_red_dot)
 
-        app_title = QLabel("LyricForge")
-        app_title.setStyleSheet(f"font-weight: 800; font-size: 12pt; color: {TEXT_PRIMARY}; border: none;")
+        app_title = QLabel("NOTHING [LYRICFORGE]")
+        app_title.setStyleSheet(f"font-weight: 900; font-size: 10.5pt; color: {TEXT_PRIMARY}; letter-spacing: 1.5px; border: none;")
         layout.addWidget(app_title)
 
         ver_badge = QLabel("v1.2")
-        ver_badge.setStyleSheet(f"font-size: 8pt; color: {TEXT_SECONDARY}; background: #2a2a2a; border: 1px solid {BORDER_SUBTLE}; border-radius: 4px; padding: 2px 6px; font-weight: 600;")
+        ver_badge.setStyleSheet(f"font-size: 7.5pt; color: {ACCENT_RED}; background: #161616; border: 1px solid #331015; border-radius: 4px; padding: 2px 6px; font-weight: 800;")
         layout.addWidget(ver_badge)
 
         layout.addStretch()
 
-        # 2. Center Section: Libadwaita ViewSwitcher Segmented Control
+        # 2. Center Section: Nothing OS Capsule ViewSwitcher
         switcher_frame = QFrame()
         switcher_frame.setStyleSheet(f"""
             QFrame {{
-                background-color: #191919;
+                background-color: #121212;
                 border: 1px solid {BORDER_SUBTLE};
                 border-radius: 8px;
             }}
@@ -69,20 +64,20 @@ class GNOMEHeaderBar(QFrame):
         switcher_lay.setContentsMargins(3, 3, 3, 3)
         switcher_lay.setSpacing(2)
 
-        self.btn_seg_library = QPushButton("Library")
+        self.btn_seg_library = QPushButton("LIBRARY")
         self.btn_seg_library.setProperty("class", "viewSegmentActive")
         self.btn_seg_library.setCheckable(True)
         self.btn_seg_library.setChecked(True)
 
-        self.btn_seg_audio = QPushButton("Audio Inspector")
+        self.btn_seg_audio = QPushButton("AUDIO INSPECTOR")
         self.btn_seg_audio.setProperty("class", "viewSegment")
         self.btn_seg_audio.setCheckable(True)
 
-        self.btn_seg_reports = QPushButton("Reports")
+        self.btn_seg_reports = QPushButton("REPORTS")
         self.btn_seg_reports.setProperty("class", "viewSegment")
         self.btn_seg_reports.setCheckable(True)
 
-        self.btn_seg_settings = QPushButton("Settings")
+        self.btn_seg_settings = QPushButton("PREFERENCES")
         self.btn_seg_settings.setProperty("class", "viewSegment")
         self.btn_seg_settings.setCheckable(True)
 
@@ -106,7 +101,7 @@ class GNOMEHeaderBar(QFrame):
 
         # 3. Right Section: Search Bar, Menu & Actions
         self.search_bar = QLineEdit()
-        self.search_bar.setPlaceholderText("Search tracks...")
+        self.search_bar.setPlaceholderText("SEARCH TRACKS...")
         self.search_bar.setFixedWidth(180)
         self.search_bar.setClearButtonEnabled(True)
         self.search_bar.textChanged.connect(self.search_changed.emit)
@@ -117,10 +112,10 @@ class GNOMEHeaderBar(QFrame):
         self.btn_menu.setFixedSize(32, 28)
         self.btn_menu.setStyleSheet(f"""
             QPushButton {{
-                border: 1px solid {BORDER_SUBTLE}; background-color: #282828;
+                border: 1px solid {BORDER_SUBTLE}; background-color: #161616;
                 color: {TEXT_PRIMARY}; font-size: 12pt; font-weight: bold; border-radius: 6px;
             }}
-            QPushButton:hover {{ background-color: #353535; }}
+            QPushButton:hover {{ background-color: #242424; }}
         """)
         self.btn_menu.clicked.connect(self.show_main_menu)
         layout.addWidget(self.btn_menu)
@@ -133,7 +128,7 @@ class GNOMEHeaderBar(QFrame):
                 border: none; background: transparent; color: {TEXT_SECONDARY};
                 font-size: 9pt; font-weight: bold; border-radius: 4px;
             }}
-            QPushButton:hover {{ color: {TEXT_PRIMARY}; background-color: #353535; }}
+            QPushButton:hover {{ color: {TEXT_PRIMARY}; background-color: #242424; }}
         """)
         btn_min.clicked.connect(self.parent_win.showMinimized)
         layout.addWidget(btn_min)
@@ -145,7 +140,7 @@ class GNOMEHeaderBar(QFrame):
                 border: none; background: transparent; color: {TEXT_SECONDARY};
                 font-size: 9pt; font-weight: bold; border-radius: 4px;
             }}
-            QPushButton:hover {{ color: #ffffff; background-color: #e01b24; }}
+            QPushButton:hover {{ color: #ffffff; background-color: {ACCENT_RED}; }}
         """)
         btn_close.clicked.connect(self.parent_win.close)
         layout.addWidget(btn_close)
@@ -171,15 +166,15 @@ class GNOMEHeaderBar(QFrame):
     def show_main_menu(self):
         menu = QMenu(self)
         
-        act_music = menu.addAction("📁 Open Music Folder...")
-        act_lyrics = menu.addAction("📁 Open Lyrics Folder...")
+        act_music = menu.addAction("📁 OPEN MUSIC FOLDER...")
+        act_lyrics = menu.addAction("📁 OPEN LYRICS FOLDER...")
         menu.addSeparator()
         
-        act_report = menu.addAction("📊 Export Report (HTML)...")
-        act_prefs = menu.addAction("⚙️ Preferences...")
+        act_report = menu.addAction("📊 EXPORT REPORT (HTML)...")
+        act_prefs = menu.addAction("⚙️ PREFERENCES...")
         menu.addSeparator()
         
-        act_about = menu.addAction("ℹ️ About LyricForge")
+        act_about = menu.addAction("ℹ️ ABOUT LYRICFORGE")
 
         pos = self.btn_menu.mapToGlobal(self.btn_menu.rect().bottomLeft())
         action = menu.exec(pos)

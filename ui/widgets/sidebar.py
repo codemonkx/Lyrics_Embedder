@@ -3,12 +3,12 @@ from PySide6.QtWidgets import (
     QFrame, QVBoxLayout, QPushButton, QLabel, QButtonGroup
 )
 from ui.theme import (
-    BG_SURFACE, BORDER_SUBTLE, TEXT_SECONDARY
+    BG_SURFACE, BORDER_SUBTLE, TEXT_SECONDARY, ACCENT_RED
 )
 
 class GNOMESidebar(QFrame):
     """
-    GNOME Libadwaita-style sidebar navigation component.
+    Nothing OS-style sidebar navigation component.
     """
     page_changed = Signal(int)
 
@@ -23,26 +23,26 @@ class GNOMESidebar(QFrame):
         layout.setSpacing(6)
 
         # Section Header
-        lbl_nav = QLabel("NAVIGATION")
-        lbl_nav.setStyleSheet(f"font-size: 8pt; font-weight: 700; color: {TEXT_SECONDARY}; letter-spacing: 0.8px;")
+        lbl_nav = QLabel(":: NAVIGATION ::")
+        lbl_nav.setStyleSheet(f"font-size: 7.5pt; font-weight: 800; color: {TEXT_SECONDARY}; letter-spacing: 1.5px;")
         layout.addWidget(lbl_nav)
         layout.addSpacing(4)
 
         # Navigation Buttons
-        self.btn_library = QPushButton("🎵  Library")
+        self.btn_library = QPushButton("🔴  LIBRARY")
         self.btn_library.setProperty("class", "navRowActive")
         self.btn_library.setCheckable(True)
         self.btn_library.setChecked(True)
 
-        self.btn_audio = QPushButton("🔬  Audio Inspector")
+        self.btn_audio = QPushButton("🔴  AUDIO INSPECTOR")
         self.btn_audio.setProperty("class", "navRow")
         self.btn_audio.setCheckable(True)
 
-        self.btn_reports = QPushButton("📊  Reports")
+        self.btn_reports = QPushButton("🔴  REPORTS")
         self.btn_reports.setProperty("class", "navRow")
         self.btn_reports.setCheckable(True)
 
-        self.btn_settings = QPushButton("⚙️  Settings")
+        self.btn_settings = QPushButton("🔴  PREFERENCES")
         self.btn_settings.setProperty("class", "navRow")
         self.btn_settings.setCheckable(True)
 

@@ -1,36 +1,37 @@
 """
-LyricForge GNOME / Adwaita Design System & Theme
-Stunning dark color palette, typography tokens, and Qt Style Sheets (QSS).
+LyricForge Nothing OS Design System & Theme
+Iconic stealth OLED black palette, dot-matrix typography tokens, Nothing Red accents (#ff002b), and QSS stylesheet.
 """
 
-# Color Palette Tokens (Adwaita Dark)
-BG_BASE = "#181818"          # Deep dark neutral base background
-BG_SURFACE = "#202020"       # Secondary surface (HeaderBar, Sidebar)
-BG_CARD = "#262626"          # Card / Elevated Surface
+# Color Palette Tokens (Nothing OS)
+BG_BASE = "#000000"          # Stealth OLED Pure Black base background
+BG_SURFACE = "#0a0a0a"       # Secondary surface (HeaderBar, Sidebar)
+BG_CARD = "#121212"          # Card / Elevated Container
+BG_CARD_HOVER = "#1a1a1a"    # Hover surface
+BG_ACTIVE = "#222222"        # Active/pressed surface
 BG_ELEVATED = BG_CARD
-BG_CARD_HOVER = "#303030"    # Hover surface
-BG_ACTIVE = "#383838"        # Active/pressed surface
 
-BORDER_SUBTLE = "#333333"     # Crisp low-contrast border
-BORDER_FOCUS = "#3584e4"      # Focus border accent
+BORDER_SUBTLE = "#262626"     # Crisp 1px subtle border
+BORDER_FOCUS = "#ff002b"      # Focus border Nothing Red accent
 
-ACCENT_BLUE = "#3584e4"       # GNOME Blue primary accent
-ACCENT_BLUE_HOVER = "#1c71d8"
-ACCENT_BLUE_ACTIVE = "#1553a1"
+ACCENT_RED = "#ff002b"        # Signature Nothing Red accent
+ACCENT_RED_HOVER = "#e50027"
+ACCENT_RED_ACTIVE = "#cc0022"
 
-TEXT_PRIMARY = "#ffffff"     # High-contrast off-white
-TEXT_SECONDARY = "#a0a0a0"   # Muted gray
-TEXT_MUTED = "#707070"       # Subtext / Metadata
+ACCENT_BLUE = "#3584e4"       # Secondary accent
+TEXT_PRIMARY = "#ffffff"     # High-contrast white
+TEXT_SECONDARY = "#888888"   # Muted gray
+TEXT_MUTED = "#555555"       # Subtext / Metadata
 
-COLOR_SUCCESS = "#34d399"    # Vibrant emerald green
-COLOR_WARNING = "#fbbf24"    # Warm yellow/amber
-COLOR_ERROR = "#f87171"      # Soft red
+COLOR_SUCCESS = "#34d399"    # Emerald Green
+COLOR_WARNING = "#fbbf24"    # Amber Yellow
+COLOR_ERROR = "#ff002b"      # Nothing Red
 
-ADWAITA_DARK_QSS = f"""
+NOTHING_OS_QSS = f"""
 /* Global Reset & Typography */
 QWidget {{
     color: {TEXT_PRIMARY};
-    font-family: "Inter", "Segoe UI", "Cantarell", system-ui, sans-serif;
+    font-family: "Inter", "Segoe UI", "Cantarell", monospace, sans-serif;
     font-size: 10pt;
     background: transparent;
 }}
@@ -77,7 +78,7 @@ QFrame#cardFrame, QWidget.adwCard {{
 }}
 
 QFrame#cardFrame:hover {{
-    border-color: #404040;
+    border-color: #383838;
 }}
 
 /* Scroll Areas */
@@ -92,21 +93,22 @@ QScrollArea > QWidget > QWidget {{
 
 /* Typography Classes */
 QLabel.pageTitle {{
-    font-size: 18pt;
+    font-size: 16pt;
     font-weight: 800;
     color: {TEXT_PRIMARY};
+    letter-spacing: 1px;
 }}
 
 QLabel.pageSubtitle {{
-    font-size: 10pt;
+    font-size: 9.5pt;
     color: {TEXT_SECONDARY};
 }}
 
 QLabel.sectionTitle {{
-    font-size: 9pt;
-    font-weight: 700;
+    font-size: 8.5pt;
+    font-weight: 800;
     color: {TEXT_SECONDARY};
-    letter-spacing: 0.8px;
+    letter-spacing: 1.5px;
     text-transform: uppercase;
 }}
 
@@ -115,16 +117,17 @@ QLabel.mutedLabel {{
     font-size: 9pt;
 }}
 
-/* Buttons */
+/* Capsule Buttons */
 QPushButton {{
     background-color: {BG_CARD};
     border: 1px solid {BORDER_SUBTLE};
     border-radius: 8px;
     padding: 7px 16px;
     color: {TEXT_PRIMARY};
-    font-weight: 600;
-    font-size: 10pt;
+    font-weight: 700;
+    font-size: 9.5pt;
     min-height: 22px;
+    letter-spacing: 0.5px;
 }}
 
 QPushButton:hover {{
@@ -137,50 +140,48 @@ QPushButton:pressed {{
 }}
 
 QPushButton:disabled {{
-    background-color: #202020;
+    background-color: #121212;
     border-color: {BORDER_SUBTLE};
     color: {TEXT_MUTED};
 }}
 
-/* Primary Button (GNOME Blue) */
+/* Primary Nothing Red Button */
 QPushButton#primaryButton, QPushButton.primaryButton {{
-    background-color: {ACCENT_BLUE};
-    border: 1px solid {ACCENT_BLUE_HOVER};
+    background-color: {ACCENT_RED};
+    border: 1px solid {ACCENT_RED_HOVER};
     color: #ffffff;
-    font-weight: 700;
+    font-weight: 800;
     border-radius: 8px;
+    letter-spacing: 0.8px;
 }}
 
 QPushButton#primaryButton:hover, QPushButton.primaryButton:hover {{
-    background-color: {ACCENT_BLUE_HOVER};
-    border-color: #185fb4;
+    background-color: {ACCENT_RED_HOVER};
+    border-color: #ff2a4b;
 }}
 
 QPushButton#primaryButton:pressed, QPushButton.primaryButton:pressed {{
-    background-color: {ACCENT_BLUE_ACTIVE};
+    background-color: {ACCENT_RED_ACTIVE};
 }}
 
-QPushButton#primaryButton:disabled, QPushButton.primaryButton:disabled {{
-    background-color: #1f3659;
-    border-color: #1b2c45;
-    color: #4a6a94;
+QPushButton#primaryButton:disabled {{
+    background-color: #3d0d14;
+    border-color: #2b080d;
+    color: #8c3844;
 }}
 
-/* Destructive Button (GNOME Red) */
+/* Destructive Button */
 QPushButton#destructiveButton, QPushButton.destructiveButton {{
-    background-color: {COLOR_ERROR};
-    border: 1px solid #dc2626;
-    color: #ffffff;
+    background-color: #1a080a;
+    border: 1px solid {ACCENT_RED};
+    color: {ACCENT_RED};
     font-weight: 700;
     border-radius: 8px;
 }}
 
 QPushButton#destructiveButton:hover, QPushButton.destructiveButton:hover {{
-    background-color: #dc2626;
-}}
-
-QPushButton#destructiveButton:pressed, QPushButton.destructiveButton:pressed {{
-    background-color: #b91c1c;
+    background-color: {ACCENT_RED};
+    color: #ffffff;
 }}
 
 /* Sidebar Navigation Buttons */
@@ -191,8 +192,9 @@ QPushButton.navRow {{
     padding: 10px 14px;
     text-align: left;
     color: {TEXT_SECONDARY};
-    font-weight: 600;
-    font-size: 10pt;
+    font-weight: 700;
+    font-size: 9.5pt;
+    letter-spacing: 0.5px;
 }}
 
 QPushButton.navRow:hover {{
@@ -203,13 +205,14 @@ QPushButton.navRow:hover {{
 QPushButton.navRowActive {{
     background-color: {BG_CARD};
     border: 1px solid {BORDER_SUBTLE};
-    border-left: 3.5px solid {ACCENT_BLUE};
+    border-left: 3.5px solid {ACCENT_RED};
     border-radius: 8px;
     padding: 10px 14px;
     text-align: left;
     color: {TEXT_PRIMARY};
-    font-weight: 700;
-    font-size: 10pt;
+    font-weight: 800;
+    font-size: 9.5pt;
+    letter-spacing: 0.5px;
 }}
 
 /* Header View Switcher Segmented Buttons */
@@ -219,48 +222,50 @@ QPushButton.viewSegment {{
     border-radius: 6px;
     padding: 5px 12px;
     color: {TEXT_SECONDARY};
-    font-weight: 600;
-    font-size: 9.5pt;
+    font-weight: 700;
+    font-size: 9pt;
+    letter-spacing: 0.5px;
 }}
 
 QPushButton.viewSegment:hover {{
-    background-color: #2a2a2a;
+    background-color: #222222;
     color: {TEXT_PRIMARY};
 }}
 
 QPushButton.viewSegmentActive {{
-    background-color: #333333;
-    border: 1px solid #444444;
+    background-color: #222222;
+    border: 1px solid #383838;
     border-radius: 6px;
     padding: 5px 12px;
     color: {TEXT_PRIMARY};
-    font-weight: 700;
-    font-size: 9.5pt;
+    font-weight: 800;
+    font-size: 9pt;
+    letter-spacing: 0.5px;
 }}
 
 /* Input Fields */
 QLineEdit {{
-    background-color: #1f1f1f;
+    background-color: #0c0c0c;
     border: 1px solid {BORDER_SUBTLE};
     border-radius: 8px;
     padding: 6px 12px;
     color: {TEXT_PRIMARY};
-    selection-background-color: {ACCENT_BLUE};
+    selection-background-color: {ACCENT_RED};
     font-size: 10pt;
 }}
 
 QLineEdit:focus {{
     border: 1px solid {BORDER_FOCUS};
-    background-color: #242424;
+    background-color: #141414;
 }}
 
 QTextEdit {{
-    background-color: #1a1a1a;
+    background-color: #080808;
     border: 1px solid {BORDER_SUBTLE};
     border-radius: 8px;
     color: {TEXT_PRIMARY};
     padding: 10px;
-    selection-background-color: {ACCENT_BLUE};
+    selection-background-color: {ACCENT_RED};
     font-size: 10pt;
 }}
 
@@ -275,7 +280,8 @@ QComboBox {{
     border-radius: 8px;
     padding: 5px 12px;
     color: {TEXT_PRIMARY};
-    font-weight: 600;
+    font-weight: 700;
+    font-size: 9.5pt;
 }}
 
 QComboBox:hover {{
@@ -291,47 +297,47 @@ QComboBox QAbstractItemView {{
     background-color: {BG_SURFACE};
     border: 1px solid {BORDER_SUBTLE};
     border-radius: 8px;
-    selection-background-color: {ACCENT_BLUE};
+    selection-background-color: {ACCENT_RED};
     color: {TEXT_PRIMARY};
     padding: 4px;
 }}
 
-/* Table Widget (GNOME List Style) */
+/* Table Widget (Nothing OS Style) */
 QTableWidget {{
     background-color: transparent;
-    alternate-background-color: #1c1c1c;
+    alternate-background-color: #0d0d0d;
     gridline-color: transparent;
     border: none;
     outline: none;
 }}
 
 QTableWidget::item {{
-    border-bottom: 1px solid #282828;
+    border-bottom: 1px solid #1c1c1c;
     padding: 8px 12px;
     color: {TEXT_PRIMARY};
-    font-size: 10pt;
+    font-size: 9.5pt;
 }}
 
 QTableWidget::item:hover {{
-    background-color: #282828;
+    background-color: #1a1a1a;
 }}
 
 QTableWidget::item:selected {{
-    background-color: #24354a;
+    background-color: #2b0b10;
     color: #ffffff;
 }}
 
 QTableWidget::indicator {{
     width: 16px;
     height: 16px;
-    border: 1px solid #4a4a4a;
+    border: 1px solid #3d3d3d;
     border-radius: 4px;
-    background-color: #222222;
+    background-color: #121212;
 }}
 
 QTableWidget::indicator:checked {{
-    background-color: {ACCENT_BLUE};
-    border-color: {ACCENT_BLUE};
+    background-color: {ACCENT_RED};
+    border-color: {ACCENT_RED};
     image: url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgd2lkdGg9IjE2IiBmaWxsPSJub25lIiBzdHJva2U9IiNmZmZmZmYiIHN0cm9rZS13aWR0aD0iMyIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj48cG9seWxpbmUgcG9pbnRzPSIyMCA2IDkgMTcgNCAxMiIvPjwvc3ZnPg==);
 }}
 
@@ -341,10 +347,10 @@ QHeaderView::section {{
     padding: 8px 12px;
     border: none;
     border-bottom: 1px solid {BORDER_SUBTLE};
-    font-weight: 700;
-    font-size: 9pt;
+    font-weight: 800;
+    font-size: 8.5pt;
     text-transform: uppercase;
-    letter-spacing: 0.8px;
+    letter-spacing: 1px;
 }}
 
 /* Checkboxes & Sliders */
@@ -357,27 +363,27 @@ QCheckBox {{
 QCheckBox::indicator {{
     width: 18px;
     height: 18px;
-    border: 1px solid #4a4a4a;
+    border: 1px solid #3d3d3d;
     border-radius: 4px;
-    background-color: #222222;
+    background-color: #121212;
 }}
 
 QCheckBox::indicator:checked {{
-    background-color: {ACCENT_BLUE};
-    border-color: {ACCENT_BLUE};
+    background-color: {ACCENT_RED};
+    border-color: {ACCENT_RED};
     image: url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgd2lkdGg9IjE2IiBmaWxsPSJub25lIiBzdHJva2U9IiNmZmZmZmYiIHN0cm9rZS13aWR0aD0iMyIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj48cG9seWxpbmUgcG9pbnRzPSIyMCA2IDkgMTcgNCAxMiIvPjwvc3ZnPg==);
 }}
 
 QSlider::groove:horizontal {{
     border: none;
-    height: 5px;
+    height: 4px;
     background: {BORDER_SUBTLE};
-    border-radius: 2.5px;
+    border-radius: 2px;
 }}
 
 QSlider::sub-page:horizontal {{
-    background: {ACCENT_BLUE};
-    border-radius: 2.5px;
+    background: {ACCENT_RED};
+    border-radius: 2px;
 }}
 
 QSlider::handle:horizontal {{
@@ -385,27 +391,27 @@ QSlider::handle:horizontal {{
     border: 1px solid {BORDER_SUBTLE};
     width: 16px;
     height: 16px;
-    margin: -5.5px 0;
+    margin: -6px 0;
     border-radius: 8px;
 }}
 
 QSlider::handle:horizontal:hover {{
     background: #ffffff;
-    border-color: {ACCENT_BLUE};
+    border-color: {ACCENT_RED};
 }}
 
 /* Progress Bar */
 QProgressBar {{
     border: none;
     border-radius: 4px;
-    background-color: #1a1a1a;
+    background-color: #0c0c0c;
     text-align: center;
     color: transparent;
     height: 8px;
 }}
 
 QProgressBar::chunk {{
-    background-color: {ACCENT_BLUE};
+    background-color: {ACCENT_RED};
     border-radius: 4px;
 }}
 
@@ -418,13 +424,13 @@ QScrollBar:vertical {{
 }}
 
 QScrollBar::handle:vertical {{
-    background: #383838;
+    background: #2a2a2a;
     min-height: 28px;
     border-radius: 4px;
 }}
 
 QScrollBar::handle:vertical:hover {{
-    background: #4a4a4a;
+    background: #444444;
 }}
 
 QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {{
@@ -440,13 +446,13 @@ QScrollBar:horizontal {{
 }}
 
 QScrollBar::handle:horizontal {{
-    background: #383838;
+    background: #2a2a2a;
     min-width: 28px;
     border-radius: 4px;
 }}
 
 QScrollBar::handle:horizontal:hover {{
-    background: #4a4a4a;
+    background: #444444;
 }}
 
 QScrollBar::add-line:horizontal, QScrollBar::sub-line:horizontal {{
@@ -466,12 +472,12 @@ QMenu::item {{
     padding: 7px 18px;
     color: {TEXT_PRIMARY};
     border-radius: 6px;
-    font-size: 10pt;
-    font-weight: 500;
+    font-size: 9.5pt;
+    font-weight: 600;
 }}
 
 QMenu::item:selected {{
-    background-color: {ACCENT_BLUE};
+    background-color: {ACCENT_RED};
     color: #ffffff;
 }}
 
