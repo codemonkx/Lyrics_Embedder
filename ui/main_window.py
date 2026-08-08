@@ -26,7 +26,7 @@ from core.report import ReportGenerator
 from core.verifier import AudioVerifier
 
 from ui.theme import (
-    ADWAITA_DARK_QSS, BG_BASE, BG_SURFACE, BG_ELEVATED, BORDER_SUBTLE,
+    ADWAITA_DARK_QSS, BG_BASE, BG_SURFACE, BG_CARD, BORDER_SUBTLE,
     TEXT_PRIMARY, TEXT_SECONDARY, TEXT_MUTED, ACCENT_BLUE,
     COLOR_SUCCESS, COLOR_WARNING, COLOR_ERROR
 )
@@ -275,7 +275,7 @@ class LyricForgeWindow(QMainWindow):
         if os.path.exists(icon_path):
             self.setWindowIcon(QIcon(icon_path))
 
-        self.resize(1240, 780)
+        self.resize(1260, 800)
         self.setStyleSheet(ADWAITA_DARK_QSS)
         self.init_ui()
 
@@ -289,9 +289,10 @@ class LyricForgeWindow(QMainWindow):
         main_layout.setContentsMargins(0, 0, 0, 0)
         main_layout.setSpacing(0)
 
-        # 1. GNOME HeaderBar
+        # 1. GNOME HeaderBar with Libadwaita ViewSwitcher
         self.header_bar = GNOMEHeaderBar(self)
         self.header_bar.search_changed.connect(self.on_search_filter_changed)
+        self.header_bar.page_changed.connect(self.on_page_changed)
         main_layout.addWidget(self.header_bar)
 
         # 2. Main Body Container (Sidebar + Stacked Content Workspaces)
@@ -341,15 +342,15 @@ class LyricForgeWindow(QMainWindow):
         self.folders_banner.setObjectName("cardFrame")
         self.folders_banner.setAttribute(Qt.WA_StyledBackground, True)
         fb_lay = QHBoxLayout(self.folders_banner)
-        fb_lay.setContentsMargins(16, 10, 16, 10)
+        fb_lay.setContentsMargins(16, 12, 16, 12)
         fb_lay.setSpacing(16)
 
         self.lbl_paths_info = QLabel("No music or lyrics folders configured.")
-        self.lbl_paths_info.setStyleSheet(f"font-size: 12px; color: {TEXT_SECONDARY};")
+        self.lbl_paths_info.setStyleSheet(f"font-size: 10pt; color: {TEXT_SECONDARY};")
         fb_lay.addWidget(self.lbl_paths_info, 1)
 
         btn_change_paths = QPushButton("⚙️ Change Folders")
-        btn_change_paths.setStyleSheet("padding: 4px 10px; font-size: 12px;")
+        btn_change_paths.setStyleSheet("padding: 5px 12px; font-size: 9.5pt;")
         btn_change_paths.clicked.connect(self.show_settings_popup)
         fb_lay.addWidget(btn_change_paths)
 
@@ -373,7 +374,7 @@ class LyricForgeWindow(QMainWindow):
         self.btn_choose_folder = QPushButton("📁 Choose Music Folder")
         self.btn_choose_folder.clicked.connect(lambda: self.browse_folder("music"))
         
-        self.scan_btn = QPushButton("Scan Library")
+        self.scan_btn = QPushButton("⚡ Scan Library")
         self.scan_btn.setObjectName("primaryButton")
         self.scan_btn.clicked.connect(self.start_scan)
 
@@ -381,37 +382,43 @@ class LyricForgeWindow(QMainWindow):
         header_lay.addWidget(self.scan_btn)
         layout.addLayout(header_lay)
 
-        # 3. GNOME Summary Pills Area
-        stats_frame = QFrame()
-        stats_frame.setObjectName("cardFrame")
-        stats_frame.setAttribute(Qt.WA_StyledBackground, True)
-        stats_lay = QHBoxLayout(stats_frame)
-        stats_lay.setContentsMargins(20, 10, 20, 10)
-        stats_lay.setSpacing(32)
+        # 3. GNOME Summary Cards Area
+        stats_lay = QHBoxLayout()
+        stats_lay.setSpacing(14)
 
-        def make_stat_pill(label_text: str, color_hex: str):
+        def make_stat_card(icon_symbol: str, label_text: str, color_hex: str):
+            card = QFrame()
+            card.setObjectName("cardFrame")
+            card.setAttribute(Qt.WA_StyledBackground, True)
+            c_lay = QVBoxLayout(card)
+            c_lay.setContentsMargins(16, 12, 16, 12)
+            c_lay.setSpacing(2)
+
+            top_lay = QHBoxLayout()
+            lbl_icon = QLabel(icon_symbol)
+            lbl_icon.setStyleSheet("font-size: 14pt; border: none; background: transparent;")
+            lbl_tit = QLabel(label_text)
+            lbl_tit.setStyleSheet(f"font-size: 8.5pt; font-weight: 700; color: {TEXT_SECONDARY}; text-transform: uppercase; letter-spacing: 0.8px; border: none; background: transparent;")
+            top_lay.addWidget(lbl_icon)
+            top_lay.addWidget(lbl_tit, 1)
+            c_lay.addLayout(top_lay)
+
             val_lbl = QLabel("0")
-            val_lbl.setStyleSheet(f"font-size: 18px; font-weight: 700; color: {color_hex}; border: none;")
-            tit_lbl = QLabel(label_text)
-            tit_lbl.setStyleSheet(f"font-size: 11px; font-weight: 600; color: {TEXT_SECONDARY}; text-transform: uppercase; border: none;")
-            pill_lay = QVBoxLayout()
-            pill_lay.setSpacing(1)
-            pill_lay.addWidget(val_lbl)
-            pill_lay.addWidget(tit_lbl)
-            return val_lbl, pill_lay
+            val_lbl.setStyleSheet(f"font-size: 20pt; font-weight: 800; color: {color_hex}; border: none; background: transparent;")
+            c_lay.addWidget(val_lbl)
+            return val_lbl, card
 
-        self.lbl_stat_total, p1 = make_stat_pill("Tracks", TEXT_PRIMARY)
-        self.lbl_stat_matched, p2 = make_stat_pill("Matched", COLOR_SUCCESS)
-        self.lbl_stat_unmatched, p3 = make_stat_pill("Unmatched", TEXT_MUTED)
-        self.lbl_stat_suspicious, p4 = make_stat_pill("Needs Review", COLOR_WARNING)
+        self.lbl_stat_total, card1 = make_stat_card("🎵", "TOTAL TRACKS", TEXT_PRIMARY)
+        self.lbl_stat_matched, card2 = make_stat_card("✅", "MATCHED LYRICS", COLOR_SUCCESS)
+        self.lbl_stat_unmatched, card3 = make_stat_card("❓", "UNMATCHED", TEXT_MUTED)
+        self.lbl_stat_suspicious, card4 = make_stat_card("⚠️", "NEEDS REVIEW", COLOR_WARNING)
 
-        stats_lay.addLayout(p1)
-        stats_lay.addLayout(p2)
-        stats_lay.addLayout(p3)
-        stats_lay.addLayout(p4)
-        stats_lay.addStretch()
+        stats_lay.addWidget(card1)
+        stats_lay.addWidget(card2)
+        stats_lay.addWidget(card3)
+        stats_lay.addWidget(card4)
 
-        layout.addWidget(stats_frame)
+        layout.addLayout(stats_lay)
 
         # 4. Main Workspace Splitter (Track List & Responsive Detail Pane)
         self.splitter = QSplitter(Qt.Horizontal)
@@ -428,8 +435,8 @@ class LyricForgeWindow(QMainWindow):
         self.table.setAlternatingRowColors(True)
         self.table.setShowGrid(False)
         self.table.verticalHeader().setVisible(False)
-        self.table.verticalHeader().setDefaultSectionSize(38)
-        self.table.horizontalHeader().setMinimumHeight(32)
+        self.table.verticalHeader().setDefaultSectionSize(42)
+        self.table.horizontalHeader().setMinimumHeight(36)
         self.table.setSelectionBehavior(QTableWidget.SelectRows)
         self.table.setSelectionMode(QTableWidget.ExtendedSelection)
         self.table.setSortingEnabled(True)
@@ -454,20 +461,32 @@ class LyricForgeWindow(QMainWindow):
         # Right Container: Track Details & Lyrics Preview Drawer
         right_scroll = QScrollArea()
         right_scroll.setWidgetResizable(True)
-        right_scroll.setMinimumWidth(320)
+        right_scroll.setMinimumWidth(340)
 
         right_card = QFrame()
         right_card.setObjectName("cardFrame")
         right_card.setAttribute(Qt.WA_StyledBackground, True)
         right_lay = QVBoxLayout(right_card)
-        right_lay.setContentsMargins(16, 16, 16, 16)
+        right_lay.setContentsMargins(18, 18, 18, 18)
         right_lay.setSpacing(16)
 
-        # Track Hero Info Header
+        # Track Hero Card Header
+        hero_box = QFrame()
+        hero_box.setStyleSheet("background-color: #202020; border: 1px solid #333333; border-radius: 8px; padding: 12px;")
+        hero_lay = QHBoxLayout(hero_box)
+        hero_lay.setContentsMargins(8, 8, 8, 8)
+        hero_lay.setSpacing(12)
+
+        lbl_hero_art = QLabel("🎵")
+        lbl_hero_art.setStyleSheet("font-size: 28pt; background: transparent; border: none;")
+        hero_lay.addWidget(lbl_hero_art)
+
         self.meta_info_lbl = QLabel("Select a track from the list to view details.")
-        self.meta_info_lbl.setStyleSheet(f"color: {TEXT_PRIMARY}; font-size: 12px; line-height: 18px;")
+        self.meta_info_lbl.setStyleSheet(f"color: {TEXT_PRIMARY}; font-size: 9.5pt; line-height: 18px; background: transparent; border: none;")
         self.meta_info_lbl.setWordWrap(True)
-        right_lay.addWidget(self.meta_info_lbl)
+        hero_lay.addWidget(self.meta_info_lbl, 1)
+
+        right_lay.addWidget(hero_box)
 
         # Lyrics Editor Preview
         lyrics_hdr = QLabel("LYRICS PREVIEW")
@@ -481,12 +500,12 @@ class LyricForgeWindow(QMainWindow):
         right_lay.addWidget(self.lyric_preview)
 
         # Audio Analysis
-        audio_hdr = QLabel("AUDIO ANALYSIS")
+        audio_hdr = QLabel("AUDIO SPECTRAL ANALYSIS")
         audio_hdr.setProperty("class", "sectionTitle")
         right_lay.addWidget(audio_hdr)
 
         self.spec_verdict_lbl = QLabel("Select a track to verify cutoff frequencies.")
-        self.spec_verdict_lbl.setStyleSheet(f"color: {TEXT_SECONDARY}; font-size: 12px;")
+        self.spec_verdict_lbl.setStyleSheet(f"color: {TEXT_SECONDARY}; font-size: 9.5pt;")
         self.spec_verdict_lbl.setWordWrap(True)
         right_lay.addWidget(self.spec_verdict_lbl)
 
@@ -508,11 +527,11 @@ class LyricForgeWindow(QMainWindow):
         act_lay = QVBoxLayout()
         act_lay.setSpacing(8)
 
-        self.check_tags_btn = QPushButton("Verify File Tags")
+        self.check_tags_btn = QPushButton("🔍 Verify File Tags")
         self.check_tags_btn.setEnabled(False)
         self.check_tags_btn.clicked.connect(self.check_file_tags)
 
-        self.manual_match_btn = QPushButton("Select Lyric File Manually...")
+        self.manual_match_btn = QPushButton("🔗 Select Lyric File Manually...")
         self.manual_match_btn.setEnabled(False)
         self.manual_match_btn.clicked.connect(self.manual_match_lyric)
 
@@ -533,18 +552,18 @@ class LyricForgeWindow(QMainWindow):
         bottom_bar.setObjectName("cardFrame")
         bottom_bar.setAttribute(Qt.WA_StyledBackground, True)
         bottom_lay = QHBoxLayout(bottom_bar)
-        bottom_lay.setContentsMargins(16, 8, 16, 8)
+        bottom_lay.setContentsMargins(16, 10, 16, 10)
         bottom_lay.setSpacing(16)
 
         self.center_status_lbl = QLabel("Ready")
-        self.center_status_lbl.setStyleSheet(f"font-size: 12px; color: {TEXT_SECONDARY};")
+        self.center_status_lbl.setStyleSheet(f"font-size: 10pt; color: {TEXT_SECONDARY};")
         bottom_lay.addWidget(self.center_status_lbl, 1)
 
         self.center_progress = QProgressBar()
-        self.center_progress.setFixedWidth(140)
+        self.center_progress.setFixedWidth(160)
         bottom_lay.addWidget(self.center_progress)
 
-        self.embed_selected_btn = QPushButton("Embed Selected Lyrics")
+        self.embed_selected_btn = QPushButton("⚡ Embed Selected Lyrics")
         self.embed_selected_btn.setObjectName("primaryButton")
         self.embed_selected_btn.setEnabled(False)
         self.embed_selected_btn.clicked.connect(self.embed_selected)
@@ -589,11 +608,11 @@ class LyricForgeWindow(QMainWindow):
         filter_bar = QFrame()
         filter_bar.setObjectName("cardFrame")
         fb_lay = QHBoxLayout(filter_bar)
-        fb_lay.setContentsMargins(16, 8, 16, 8)
+        fb_lay.setContentsMargins(16, 10, 16, 10)
         fb_lay.setSpacing(12)
 
         lbl_filter = QLabel("Filter Status:")
-        lbl_filter.setStyleSheet(f"font-size: 12px; font-weight: 600; color: {TEXT_SECONDARY};")
+        lbl_filter.setStyleSheet(f"font-size: 10pt; font-weight: 600; color: {TEXT_SECONDARY};")
         fb_lay.addWidget(lbl_filter)
 
         self.audio_filter_combo = QComboBox()
@@ -609,8 +628,8 @@ class LyricForgeWindow(QMainWindow):
         self.audio_table.setAlternatingRowColors(True)
         self.audio_table.setShowGrid(False)
         self.audio_table.verticalHeader().setVisible(False)
-        self.audio_table.verticalHeader().setDefaultSectionSize(38)
-        self.audio_table.horizontalHeader().setMinimumHeight(32)
+        self.audio_table.verticalHeader().setDefaultSectionSize(42)
+        self.audio_table.horizontalHeader().setMinimumHeight(36)
         self.audio_table.setSelectionBehavior(QTableWidget.SelectRows)
 
         self.audio_table.setColumnCount(10)
@@ -648,7 +667,7 @@ class LyricForgeWindow(QMainWindow):
         export_card = QFrame()
         export_card.setObjectName("cardFrame")
         export_lay = QVBoxLayout(export_card)
-        export_lay.setContentsMargins(16, 16, 16, 16)
+        export_lay.setContentsMargins(18, 18, 18, 18)
         export_lay.setSpacing(12)
 
         lbl_exp_title = QLabel("EXPORT REPORT")
@@ -676,7 +695,7 @@ class LyricForgeWindow(QMainWindow):
         logs_card = QFrame()
         logs_card.setObjectName("cardFrame")
         logs_lay = QVBoxLayout(logs_card)
-        logs_lay.setContentsMargins(16, 16, 16, 16)
+        logs_lay.setContentsMargins(18, 18, 18, 18)
         logs_lay.setSpacing(10)
 
         logs_hdr = QHBoxLayout()
@@ -866,16 +885,15 @@ class LyricForgeWindow(QMainWindow):
         if m_path or l_path:
             m_name = Path(m_path).name if m_path else "Not set"
             l_name = Path(l_path).name if l_path else "Not set"
-            self.lbl_paths_info.setText(f"📁 <b>Music:</b> {m_name} &nbsp;|&nbsp; 📝 <b>Lyrics:</b> {l_name}")
+            self.lbl_paths_info.setText(f"📁 <b>Music Folder:</b> {m_name} &nbsp;&nbsp;|&nbsp;&nbsp; 📝 <b>Lyrics Folder:</b> {l_name}")
             self.folders_banner.setVisible(True)
         else:
             self.lbl_paths_info.setText("No music or lyrics folders configured.")
 
     def on_page_changed(self, index: int):
         self.stack.setCurrentIndex(index)
-        titles = ["Library", "Audio Inspector", "Reports & Logs", "Preferences"]
-        if index < len(titles):
-            self.header_bar.set_page_title(titles[index])
+        self.sidebar.set_active_page(index)
+        self.header_bar.set_active_segment(index)
         if index == 1:
             self.load_audio_inspector_table()
 
@@ -904,11 +922,9 @@ class LyricForgeWindow(QMainWindow):
             self.table.setRowHidden(row, not match_found)
 
     def show_reports_popup(self):
-        self.sidebar.set_active_page(2)
         self.on_page_changed(2)
 
     def show_settings_popup(self):
-        self.sidebar.set_active_page(3)
         self.on_page_changed(3)
 
     def reset_library(self):
@@ -958,16 +974,16 @@ class LyricForgeWindow(QMainWindow):
 
     def show_table_context_menu(self, position):
         menu = QMenu(self)
-        act_tag = menu.addAction("Verify File Tag")
+        act_tag = menu.addAction("🔍 Verify File Tag")
         act_tag.setEnabled(hasattr(self, 'selected_song') and self.selected_song is not None)
         
-        act_match = menu.addAction("Manual Lyric Match...")
+        act_match = menu.addAction("🔗 Manual Lyric Match...")
         act_match.setEnabled(hasattr(self, 'selected_song') and self.selected_song is not None)
         
-        act_plot = menu.addAction("Plot Spectrum Graph")
+        act_plot = menu.addAction("📈 Plot Spectrum Graph")
         act_plot.setEnabled(hasattr(self, 'selected_song') and self.selected_song is not None)
         
-        act_export = menu.addAction("Export Library Report")
+        act_export = menu.addAction("📊 Export Library Report")
         
         action = menu.exec(self.table.mapToGlobal(position))
         if action == act_tag:
@@ -1093,7 +1109,7 @@ class LyricForgeWindow(QMainWindow):
         self.plot_btn.setEnabled(False)
         self.plot_img_lbl.setVisible(False)
         
-        self.meta_info_lbl.setText("Select a track to inspect details.")
+        self.meta_info_lbl.setText("Select a track from the list to view details.")
         self.spec_verdict_lbl.setText("Select a song to review audio integrity verification.")
         self.lyric_preview.setPlainText("Select a song with matched lyrics to preview/edit.")
 
@@ -1103,8 +1119,8 @@ class LyricForgeWindow(QMainWindow):
         self.table.setHorizontalHeaderLabels(["", "Song Title", "Artist", "Album", "Duration", "Match Score", "Status"])
         self.table.setColumnWidth(0, 32)
         self.table.setColumnWidth(4, 75)
-        self.table.setColumnWidth(5, 95)
-        self.table.setColumnWidth(6, 110)
+        self.table.setColumnWidth(5, 100)
+        self.table.setColumnWidth(6, 120)
         self.table.horizontalHeader().setSectionResizeMode(QHeaderView.Interactive)
         self.table.horizontalHeader().setSectionResizeMode(1, QHeaderView.Stretch)
         self.table.horizontalHeader().setSectionResizeMode(2, QHeaderView.Stretch)
@@ -1148,7 +1164,7 @@ class LyricForgeWindow(QMainWindow):
             self.table.setItem(row, 4, QTableWidgetItem(dur_txt))
 
             score_val = 0.0
-            score_txt = ""
+            score_txt = "-"
             if song["lyric_id"]:
                 with self.db.get_connection() as conn:
                     cursor = conn.cursor()
@@ -1157,7 +1173,9 @@ class LyricForgeWindow(QMainWindow):
                     if row_match:
                         score_val = float(row_match['score'])
                         score_txt = f"{score_val:.1f}%"
-            self.table.setItem(row, 5, QTableWidgetItem(score_txt))
+            score_item = QTableWidgetItem(score_txt)
+            score_item.setTextAlignment(Qt.AlignCenter)
+            self.table.setItem(row, 5, score_item)
 
             thresh = float(self.threshold_slider.value())
             if song["status"] in ["Embedded", "Matched"]:
@@ -1176,6 +1194,7 @@ class LyricForgeWindow(QMainWindow):
 
             status_item = QTableWidgetItem(status_str)
             status_item.setForeground(QBrush(QColor(status_color)))
+            status_item.setTextAlignment(Qt.AlignCenter)
             self.table.setItem(row, 6, status_item)
 
         self.table.blockSignals(False)
@@ -1268,10 +1287,10 @@ class LyricForgeWindow(QMainWindow):
                     count += 1
                         
         if count > 0:
-            self.embed_selected_btn.setText(f"Embed {count} Songs")
+            self.embed_selected_btn.setText(f"⚡ Embed {count} Songs")
             self.embed_selected_btn.setEnabled(True)
         else:
-            self.embed_selected_btn.setText("Embed Selected Lyrics")
+            self.embed_selected_btn.setText("⚡ Embed Selected Lyrics")
             self.embed_selected_btn.setEnabled(False)
 
     def table_row_clicked(self, item: QTableWidgetItem):
@@ -1287,7 +1306,7 @@ class LyricForgeWindow(QMainWindow):
         self.plot_img_lbl.setVisible(False)
         self.plot_btn.setText("📈 Plot Spectrum Graph")
         
-        ext = Path(song["file_path"]).suffix.upper()
+        ext = Path(song["file_path"]).suffix.upper().replace(".", "")
         sr_val = song.get("sample_rate")
         sr_txt = f"{sr_val:,} Hz" if sr_val else "Unknown"
         bits_val = song.get("bits_per_sample")
@@ -1299,13 +1318,11 @@ class LyricForgeWindow(QMainWindow):
         size_mb = (song.get("file_size") or 0) / (1024 * 1024)
         
         meta_txt = (
-            f"<b>File:</b> {Path(song['file_path']).name}<br>"
-            f"<b>Path:</b> {song['file_path']}<br>"
-            f"<b>Format:</b> {ext} ({bits_txt}, {ch_txt})<br>"
-            f"<b>Sample Rate:</b> {sr_txt}<br>"
-            f"<b>Bitrate:</b> {br_txt}<br>"
-            f"<b>File Size:</b> {size_mb:.1f} MB<br>"
-            f"<b>Modified:</b> {song.get('date_modified', 'N/A')}"
+            f"<b style='font-size: 11pt;'>{song['title'] or Path(song['file_path']).name}</b><br>"
+            f"<span style='color: {TEXT_SECONDARY};'>{song['artist'] or 'Unknown Artist'} — {song['album'] or 'Unknown Album'}</span><br><br>"
+            f"<span style='background: #333333; color: {ACCENT_BLUE}; border-radius: 4px; padding: 2px 6px; font-weight: bold;'>{ext}</span> "
+            f"<span style='background: #333333; color: #ffffff; border-radius: 4px; padding: 2px 6px;'>{bits_txt} / {sr_txt}</span> "
+            f"<span style='background: #333333; color: #ffffff; border-radius: 4px; padding: 2px 6px;'>{size_mb:.1f} MB</span>"
         )
         self.meta_info_lbl.setText(meta_txt)
         
@@ -1323,7 +1340,7 @@ class LyricForgeWindow(QMainWindow):
                 verdict = "Fake Lossless"
                 verdict_color = COLOR_ERROR
             spec_txt = (
-                f"<b>Verdict:</b> <span style='color:{verdict_color};'>{verdict}</span><br>"
+                f"<b>Verdict:</b> <span style='color:{verdict_color}; font-weight: bold;'>{verdict}</span><br>"
                 f"<b>Spectral Cutoff:</b> {cutoff_hz:.1f} Hz<br>"
                 f"<b>Details:</b> {song.get('legit_reason', 'No additional details.')}"
             )
@@ -1484,8 +1501,8 @@ class LyricForgeWindow(QMainWindow):
                 
                 plt.figure(figsize=(5.5, 2.8))
                 plt.plot(frequencies / 1000.0, magnitudes_db, color='#3584e4', alpha=0.85)
-                plt.axhline(y=threshold_db, color='#e01b24', linestyle='--', alpha=0.7)
-                plt.axvline(x=cutoff / 1000.0, color='#2ec27e', linestyle='-.', linewidth=1.5)
+                plt.axhline(y=threshold_db, color='#f87171', linestyle='--', alpha=0.7)
+                plt.axvline(x=cutoff / 1000.0, color='#34d399', linestyle='-.', linewidth=1.5)
                 
                 plt.title(method_title, fontsize=9, color='white', fontweight='bold')
                 plt.xlabel("Frequency (kHz)", fontsize=8, color='white')
@@ -1494,18 +1511,18 @@ class LyricForgeWindow(QMainWindow):
                 plt.ylim(-100, 5)
                 
                 fig = plt.gcf()
-                fig.patch.set_facecolor('#1e1e1e')
+                fig.patch.set_facecolor('#181818')
                 ax = plt.gca()
-                ax.set_facecolor('#2d2d2d')
-                ax.spines['bottom'].set_color('#303030')
-                ax.spines['top'].set_color('#303030')
-                ax.spines['left'].set_color('#303030')
-                ax.spines['right'].set_color('#303030')
+                ax.set_facecolor('#262626')
+                ax.spines['bottom'].set_color('#333333')
+                ax.spines['top'].set_color('#333333')
+                ax.spines['left'].set_color('#333333')
+                ax.spines['right'].set_color('#333333')
                 ax.tick_params(colors='white', labelsize=8)
-                ax.grid(True, color='#353535', linestyle=':', alpha=0.6)
+                ax.grid(True, color='#303030', linestyle=':', alpha=0.6)
                 
                 plt.tight_layout()
-                plt.savefig(temp_img, facecolor='#1e1e1e', dpi=100)
+                plt.savefig(temp_img, facecolor='#181818', dpi=100)
                 plt.close()
                 
                 pixmap = QPixmap(temp_img)
@@ -1652,7 +1669,7 @@ class LyricForgeWindow(QMainWindow):
 def main():
     app = QApplication(sys.argv)
     
-    app_font = QFont("Cantarell", 10)
+    app_font = QFont("Inter", 10)
     app_font.setStyleHint(QFont.SansSerif)
     app.setFont(app_font)
 
