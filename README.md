@@ -1,86 +1,148 @@
-# LyricForge - Smart Lyrics Embedder & Audio Quality Inspector
+# 🎵 LYRICFORGE PRO v2.0
+> **Commercial-Grade Desktop Music Library, Synchronized Lyric Embedding & Audio Spectral Analysis Platform**
 
-Welcome to **LyricForge**! This is a simple, smart, and safe tool designed to help you organize your music library. 
-
-If you have music files (like `.mp3` or `.flac`) and synchronized lyrics files (like `.lrc` or `.ttml`), LyricForge automatically matches them up and writes the lyrics directly into the music files. This allows music players on your phone or computer to display synchronized lyrics on screen while the song plays.
-
-Additionally, LyricForge can analyze your music files' sound waves to verify if they are truly high-quality (lossless) or if they are low-quality files disguised as high-quality (fake upscales).
-
----
-
-## 🌟 What does this app do? (In Simple Terms)
-
-1. **Scans Folders:** You choose a folder with music and a folder with lyrics. LyricForge reads them all.
-2. **Smart Word-Matching:** It compares the song title, artist name, and album name with the lyric files. Even if the files are named slightly differently (e.g. `01. Shape of You.mp3` vs `shape_of_you.lrc`), it matches them correctly.
-3. **Quality Check (Spectrum Inspector):** It inspects the audio frequencies. If a song is labeled as high-quality (like FLAC) but actually sounds like a low-quality MP3, the app flags it with a warning.
-4. **Safe Embedding:** It backs up your music files first. Then, it writes the lyrics inside the song file and double-checks if it succeeded. If something goes wrong, it restores your original file safely.
-5. **Interactive Interface (GUI):** A clean dark-mode desktop window where you can drag-and-drop folders, preview matched lyrics side-by-side, view real-time progress, and check completion statistics.
+[![Python Version](https://img.shields.io/badge/Python-3.11%2B-blue.svg)](https://www.python.org/)
+[![UI Framework](https://img.shields.io/badge/UI-PySide6%20%2F%20Qt%20Quick%20(QML)-red.svg)](https://www.qt.io/)
+[![Database](https://img.shields.io/badge/ORM-SQLAlchemy-green.svg)](https://www.sqlalchemy.org/)
+[![Tests](https://img.shields.io/badge/Tests-18%2F18%20Passed-success.svg)](https://pytest.org/)
+[![License](https://img.shields.io/badge/License-MIT-brightgreen.svg)](LICENSE)
 
 ---
 
-## 🚀 How to Set Up (For Beginners)
+## 🌟 Overview
 
-To run this app on your computer, you need **Python** installed. 
+**LyricForge Pro** is a modern desktop music library management, synchronized lyric matching, tag embedding, and audio spectral analysis application built with **PySide6 + Qt Quick (QML)**, **SQLAlchemy**, **Pydantic**, **SciPy FFT**, **RapidFuzz**, and **Watchdog**.
 
-### Step 1: Install Python
-If you don't have Python, download it from [python.org](https://www.python.org/downloads/) (version 3.11 or newer). During installation, make sure to check the box that says **"Add Python to PATH"** (this is very important!).
+Designed with a content-first information architecture inspired by professional digital audio workstations and modern desktop tools, LyricForge Pro offers a stealth dark interface, interactive frequency spectrum graphs, explainable lyric matching algorithms, and zero-loss database safety.
 
-### Step 2: Download the Project
-Download this project as a ZIP folder and extract it somewhere on your computer (for example, on your Desktop).
+---
 
-### Step 3: Install Required Packages
-Open your terminal or command prompt (search for `cmd` on Windows, or `Terminal` on Mac), navigate to this project folder, and run:
+## ✨ Key Features
+
+### 1. 🎨 Product-Grade QML Presentation Layer
+* **Stealth Dark Design Token System**: Custom dark color palette (`#0B0C0E` base, `#121417` surface, `#181B1F` elevated) with signature Nothing Crimson (`#FF002B`) primary accents.
+* **Frameless OS Window System**: Native Windows DWM window dragging (`startSystemMove`), 8-directional border edge drag-resizing (`startSystemResize`), and taskbar minimize/restore integration.
+* **High-Density Track Table**: Multi-column track list table (`Title`, `Artist`, `Album`, `Format`, `Duration`, `Status`) with 38px compact row heights, vinyl audio badges (`🎵`), and smooth 120ms hover animations.
+* **Contextual Track Inspector Drawer**: Collapsible slide-over drawer detailing format specifications, lyric editor preview, spectrum provider graph, and primary/secondary action buttons.
+* **Interactive Tab Filter Bar**: Filter library tracks instantly by status (`ALL TRACKS`, `MATCHED`, `UNMATCHED`, `NEEDS REVIEW`).
+* **Floating Toast Notifications**: Non-intrusive bottom-right status overlays for library scans, lyric embedding, and directory changes.
+
+### 2. 📝 Smart Synchronized Lyric Engine
+* **Multi-Format Parsing**: Full support for `.lrc` (LRC) and `.ttml` (TTML) synchronized lyric formats.
+* **Multi-Stage Fuzzy Matching Engine**: RapidFuzz weighted matching algorithm comparing title, artist, album, duration, and filename.
+* **Safe Audio Tag Embedding**: Writes synchronized lyrics directly into ID3, Vorbis, and FLAC tags using Mutagen with automatic safety backups before file modification.
+
+### 3. 🔬 Audio Integrity & Spectral Inspection
+* **SciPy FFT Spectral Analyzer**: Calculates magnitude spectrums and brickwall Nyquist cutoff frequencies to detect lossy-transcoded or fake upscale audio files.
+* **PyQtGraph QML Image Provider Bridge**: Renders crash-free spectral plots directly inside QML `SpectrumView` widgets via `image://spectrum/file_path`.
+* **Zero-Dependency Native WAV Fallback**: Native Python WAV reader (`scipy.io.wavfile.read`) ensuring instant spectrum plotting for `.wav` files even if FFmpeg is absent.
+* **Empirical Scientific Evidence Breakdown**: Clear separation between **Observation** (cutoff frequency), **Interpretation** (spectral characteristics), and **Confidence Rating**.
+
+### 4. ⚙️ Real-Time Monitoring & Database Layer
+* **SQLAlchemy ORM Data Access**: DAO repository pattern mapping ORM models (`SongModel`, `LyricModel`, `MatchModel`, `SettingModel`) to Pydantic DTOs.
+* **Automatic Safety Backups & Schema Migration**: Automatic database backups (`backups/lyricforge_db_backup.db`) and non-destructive column auto-migrations (`PRAGMA table_info`).
+* **Debounced Watchdog Listener**: Real-time filesystem monitor with a 500ms single-shot timer queue to deduplicate filesystem changes.
+* **Platformdirs Integration**: Standard OS configuration and user log directories (`C:\Users\<User>\AppData\Local\LyricForge`).
+
+---
+
+## 🏗 System Architecture
+
+```
+                                  LYRICFORGE PRO
+                                        |
+                          PySide6 QApplication (main.py)
+                                        |
+               +------------------------+------------------------+
+               |                                                 |
+        Qt Quick / QML                                     Python Core
+    (Presentation Layer)                                (Engine & Logic)
+               |                                                 |
+   +-----------+-----------+                      +--------------+--------------+
+   |                       |                      |              |              |
+ QML Views            PyQtGraph Image          Services       Database        Workers
+ (Library, Audio,      Provider Bridge        (Library,      (SQLAlchemy    (Scanning,
+  Lyrics, Settings)   (Spectrum Plot)          Lyrics, Audio) + Pydantic)    Matching, FFT)
+                                                  |              |              |
+                                             +----+----+    +----+----+    +----+----+
+                                             |         |    |         |    |         |
+                                          Mutagen RapidFuzz SciPy  FFmpeg Watchdog platformdirs
+```
+
+---
+
+## 🚀 Getting Started
+
+### Prerequisites
+* **Python**: Version `3.11` or newer.
+* **FFmpeg** *(Optional)*: Recommended for spectral analysis of compressed formats (`.mp3`, `.flac`, `.m4a`, `.ogg`).
+
+### 1. Installation
+Clone the repository and install dependencies:
 ```bash
+git clone https.github.com/codemonkx/Lyrics_Embedder.git
+cd Lyrics_Embedder
 pip install -r requirements.txt
 ```
-This automatically downloads the auxiliary libraries needed to run the app.
 
----
-
-## 💻 How to Use the App
-
-### 1. The Easy Way: Graphical Interface (GUI)
-To open the user-friendly desktop window, run this command in your terminal:
+### 2. Launching the Application
+Launch the LyricForge Pro desktop GUI:
 ```bash
 python app.py
 ```
-* **Step 1:** Select or **drag-and-drop** your Music and Lyrics folders directly into the app window.
-* **Step 2:** Click **Scan & Match Library**. The app will scan the folders and match songs with lyrics.
-* **Step 3:** Review the matches on the screen. Click on a song to preview its lyrics side-by-side.
-* **Step 4:** Check the boxes next to the songs you want to modify, and click **Embed Selected Lyrics**.
-* **Step 5:** View your results on the dashboard summary page.
-
-### 2. The Advanced Way: Command Line (CLI)
-If you prefer running the tool headlessly (without opening a window), you can pass parameters directly:
+Or launch using python package module path:
 ```bash
-python app.py -m "/path/to/music" -l "/path/to/lyrics" --embed
+python -m app.main
 ```
-* `-m`: Path to your music folder.
-* `-l`: Path to your lyrics folder.
-* `--embed`: Automatically embed matched lyrics immediately.
-* `--verify`: Run quality checks on the audio frequencies.
-* `-r html`: Generate a visual HTML summary report in the `exports` folder.
+
+### 3. Running Automated Tests
+Run the complete unit test suite:
+```bash
+pytest -v
+```
 
 ---
 
-## 📁 Project Structure (What is inside?)
+## ⌨️ Keyboard Shortcuts
 
-Here is a simple map of how this project is organized:
+| Shortcut | Description |
+| :--- | :--- |
+| `Ctrl + K` or `Ctrl + F` | Focus global search input |
+| `Ctrl + R` | Trigger instant music library re-scan |
+| `Escape` | Clear active track selection inspector |
 
-* [app.py](file:///d:/Lyrics-Ember/app.py) — The main door to the application. It launches either the graphical window or runs the command-line mode.
-* **`core/`** (The brain of the app):
-  * [scanner.py](file:///d:/Lyrics-Ember/core/scanner.py) — Finds and lists all the music and lyrics files in your folders.
-  * [lyrics.py](file:///d:/Lyrics-Ember/core/lyrics.py) — Reads and parses timed lyric files.
-  * [converter.py](file:///d:/Lyrics-Ember/core/converter.py) — Converts complex lyric formats (like `.ttml`) into standard format (`.lrc`).
-  * [metadata.py](file:///d:/Lyrics-Ember/core/metadata.py) — Reads song tags (like title, artist name, and duration).
-  * [matcher.py](file:///d:/Lyrics-Ember/core/matcher.py) — The matching engine that pairs the correct lyric file with each song.
-  * [verifier.py](file:///d:/Lyrics-Ember/core/verifier.py) — The audio quality inspector that checks if audio streams are genuine or fake upscales.
-  * [backup.py](file:///d:/Lyrics-Ember/core/backup.py) — Handles making safety backups and restoring files if needed.
-  * [embedder.py](file:///d:/Lyrics-Ember/core/embedder.py) — Writes the lyrics directly into the music file tags.
-  * [db_manager.py](file:///d:/Lyrics-Ember/core/db_manager.py) — Stores matching information in a local database so subsequent runs are instant.
-  * [report.py](file:///d:/Lyrics-Ember/core/report.py) — Exports results into HTML, TXT, or JSON reports.
-* **`ui/`** (The visual window):
-  * [main_window.py](file:///d:/Lyrics-Ember/ui/main_window.py) — Draws the dark-mode layout, manages drag-and-drop actions, runs progress bar animations, and displays the stats dashboard cards.
-* **`tests/`** (Safety checks):
-  * [test_core.py](file:///d:/Lyrics-Ember/tests/test_core.py) — Automated tests to verify that every module functions correctly.
-"# Lyrics_Embedder" 
+---
+
+## 📁 Directory Structure Reference
+
+```
+Lyrics_Embedder/
+├── app.py                      # Main entry point launcher
+├── requirements.txt            # Target dependency manifest
+├── README.md                   # Project documentation
+├── app/                        # Python Core Package
+│   ├── core/                   # Constants, config, logging, application paths
+│   ├── models/                 # Pydantic DTO models (Track, Lyric, Analysis)
+│   ├── database/               # SQLAlchemy engine, ORM models, repositories
+│   ├── audio/                  # FFmpeg decoder, SciPy FFT, SpectrumImageProvider
+│   ├── lyrics/                 # LRC, TTML parsers, RapidFuzz matching engine
+│   ├── metadata/               # Mutagen metadata reader & tag writer
+│   ├── workers/                # Cancellable QThread background threads
+│   ├── monitoring/             # Watchdog debounced filesystem watcher
+│   ├── services/               # QObject QML bridge controllers
+│   └── platform/               # Win32 native event filter
+├── qml/                        # Qt Quick / QML Presentation System
+│   ├── Main.qml                # Root ApplicationWindow shell
+│   ├── theme/                  # Colors.qml, Typography.qml, Metrics.qml
+│   ├── components/             # Sidebar, Header, TrackTable, Inspector, FilterBar
+│   └── pages/                  # LibraryPage, AnalysisPage, ReportsPage, SettingsPage
+└── tests/                      # Automated Test Suite
+    ├── test_core.py            # Core engine unit tests
+    └── test_pro.py             # SQLAlchemy & Pydantic Pro tests
+```
+
+---
+
+## 📜 License
+
+This project is licensed under the **MIT License** — see the [LICENSE](LICENSE) file for details.
