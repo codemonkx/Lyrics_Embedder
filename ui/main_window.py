@@ -11,7 +11,7 @@ from PySide6.QtWidgets import (
     QLabel, QPushButton, QFileDialog, QTableWidget,
     QTableWidgetItem, QHeaderView, QSplitter, QTextEdit, QProgressBar,
     QMessageBox, QCheckBox, QSlider, QGridLayout, QFrame, QStackedWidget,
-    QButtonGroup, QLineEdit, QScrollArea, QMenu, QComboBox
+    QButtonGroup, QLineEdit, QScrollArea, QMenu, QComboBox, QSizeGrip
 )
 from PySide6.QtGui import QFont, QColor, QBrush, QIcon, QPainter, QPixmap
 
@@ -264,7 +264,7 @@ class LyricForgeWindow(QMainWindow):
     """
     Main LyricForge Resizable Desktop Application Window.
     """
-    BORDER_MARGIN = 8
+    BORDER_MARGIN = 10
 
     def __init__(self, db_path: str = "lyricforge.db"):
         super().__init__()
@@ -273,7 +273,7 @@ class LyricForgeWindow(QMainWindow):
         self.setWindowTitle("LyricForge Pro")
         self.setMinimumSize(960, 600)
         
-        # Frameless window configuration with mouse tracking for border resize handles
+        # Frameless window configuration
         self.setWindowFlags(Qt.FramelessWindowHint | Qt.WindowSystemMenuHint)
         self.setAttribute(Qt.WA_TranslucentBackground, True)
         
@@ -284,10 +284,6 @@ class LyricForgeWindow(QMainWindow):
 
         self.resize(1260, 800)
         self.setStyleSheet(NOTHING_OS_QSS)
-
-        self.drag_edge = None
-        self.drag_start_pos = QPoint()
-        self.drag_start_geo = QRect()
 
         self.init_ui()
 
@@ -334,6 +330,11 @@ class LyricForgeWindow(QMainWindow):
         body_layout.addWidget(self.stack, 1)
         main_layout.addWidget(body_widget, 1)
 
+        # Bottom Right QSizeGrip for Resize Dragging
+        sizegrip = QSizeGrip(self)
+        sizegrip.setStyleSheet("width: 16px; height: 16px; background: transparent;")
+        main_layout.addWidget(sizegrip, 0, Qt.AlignBottom | Qt.AlignRight)
+
         # Toast notification overlay
         self.toast = GNOMEToast(self)
 
@@ -354,49 +355,47 @@ class LyricForgeWindow(QMainWindow):
     if sys.platform == "win32":
         def nativeEvent(self, eventType, message):
             if eventType in (b"windows_generic_MSG", "windows_generic_MSG"):
-                msg = ctypes.wintypes.MSG.from_address(message.__int__())
-                WM_NCHITTEST = 0x0084
-                if msg.message == WM_NCHITTEST and not self.isMaximized():
-                    x = (msg.lParam & 0xFFFF)
-                    y = ((msg.lParam >> 16) & 0xFFFF)
-                    
-                    if x > 32767:
-                        x -= 65536
-                    if y > 32767:
-                        y -= 65536
+                try:
+                    msg = ctypes.wintypes.MSG.from_address(int(message))
+                    WM_NCHITTEST = 0x0084
+                    if msg.message == WM_NCHITTEST and not self.isMaximized():
+                        x = ctypes.c_short(msg.lParam & 0xFFFF).value
+                        y = ctypes.c_short((msg.lParam >> 16) & 0xFFFF).value
                         
-                    local_pos = self.mapFromGlobal(QPoint(x, y))
-                    lx = local_pos.x()
-                    ly = local_pos.y()
-                    w = self.width()
-                    h = self.height()
-                    m = self.BORDER_MARGIN
-                    
-                    HTLEFT = 10
-                    HTRIGHT = 11
-                    HTTOP = 12
-                    HTTOPLEFT = 13
-                    HTTOPRIGHT = 14
-                    HTBOTTOM = 15
-                    HTBOTTOMLEFT = 16
-                    HTBOTTOMRIGHT = 17
-                    
-                    if lx < m and ly < m:
-                        return True, HTTOPLEFT
-                    elif lx > w - m and ly < m:
-                        return True, HTTOPRIGHT
-                    elif lx < m and ly > h - m:
-                        return True, HTBOTTOMLEFT
-                    elif lx > w - m and ly > h - m:
-                        return True, HTBOTTOMRIGHT
-                    elif lx < m:
-                        return True, HTLEFT
-                    elif lx > w - m:
-                        return True, HTRIGHT
-                    elif ly < m:
-                        return True, HTTOP
-                    elif ly > h - m:
-                        return True, HTBOTTOM
+                        local_pos = self.mapFromGlobal(QPoint(x, y))
+                        lx = local_pos.x()
+                        ly = local_pos.y()
+                        w = self.width()
+                        h = self.height()
+                        m = self.BORDER_MARGIN
+                        
+                        HTLEFT = 10
+                        HTRIGHT = 11
+                        HTTOP = 12
+                        HTTOPLEFT = 13
+                        HTTOPRIGHT = 14
+                        HTBOTTOM = 15
+                        HTBOTTOMLEFT = 16
+                        HTBOTTOMRIGHT = 17
+                        
+                        if lx < m and ly < m:
+                            return True, HTTOPLEFT
+                        elif lx > w - m and ly < m:
+                            return True, HTTOPRIGHT
+                        elif lx < m and ly > h - m:
+                            return True, HTBOTTOMLEFT
+                        elif lx > w - m and ly > h - m:
+                            return True, HTBOTTOMRIGHT
+                        elif lx < m:
+                            return True, HTLEFT
+                        elif lx > w - m:
+                            return True, HTRIGHT
+                        elif ly < m:
+                            return True, HTTOP
+                        elif ly > h - m:
+                            return True, HTBOTTOM
+                except Exception:
+                    pass
 
             return super().nativeEvent(eventType, message)
 
