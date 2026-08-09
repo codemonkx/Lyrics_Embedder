@@ -352,10 +352,10 @@ class LyricForgeWindow(QMainWindow):
             self.showMaximized()
             self.header_bar.update_max_button_icon(True)
 
-    if sys.platform == "win32":
-        def nativeEvent(self, eventType, message):
-            if eventType in (b"windows_generic_MSG", "windows_generic_MSG"):
-                try:
+    def nativeEvent(self, eventType, message):
+        if sys.platform == "win32":
+            try:
+                if eventType in (b"windows_generic_MSG", "windows_generic_MSG"):
                     msg = ctypes.wintypes.MSG.from_address(int(message))
                     WM_NCHITTEST = 0x0084
                     if msg.message == WM_NCHITTEST and not self.isMaximized():
@@ -369,35 +369,26 @@ class LyricForgeWindow(QMainWindow):
                         h = self.height()
                         m = self.BORDER_MARGIN
                         
-                        HTLEFT = 10
-                        HTRIGHT = 11
-                        HTTOP = 12
-                        HTTOPLEFT = 13
-                        HTTOPRIGHT = 14
-                        HTBOTTOM = 15
-                        HTBOTTOMLEFT = 16
-                        HTBOTTOMRIGHT = 17
-                        
                         if lx < m and ly < m:
-                            return True, HTTOPLEFT
+                            return True, 13  # HTTOPLEFT
                         elif lx > w - m and ly < m:
-                            return True, HTTOPRIGHT
+                            return True, 14  # HTTOPRIGHT
                         elif lx < m and ly > h - m:
-                            return True, HTBOTTOMLEFT
+                            return True, 16  # HTBOTTOMLEFT
                         elif lx > w - m and ly > h - m:
-                            return True, HTBOTTOMRIGHT
+                            return True, 17  # HTBOTTOMRIGHT
                         elif lx < m:
-                            return True, HTLEFT
+                            return True, 10  # HTLEFT
                         elif lx > w - m:
-                            return True, HTRIGHT
+                            return True, 11  # HTRIGHT
                         elif ly < m:
-                            return True, HTTOP
+                            return True, 12  # HTTOP
                         elif ly > h - m:
-                            return True, HTBOTTOM
-                except Exception:
-                    pass
+                            return True, 15  # HTBOTTOM
+            except Exception:
+                pass
 
-            return super().nativeEvent(eventType, message)
+        return super().nativeEvent(eventType, message)
 
     # =========================================================================
     # WORKSPACE PAGES BUILDERS
