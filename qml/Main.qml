@@ -12,7 +12,7 @@ ApplicationWindow {
     minimumHeight: 600
     visible: true
     title: "LyricForge Pro"
-    flags: Qt.FramelessWindowHint | Qt.WindowSystemMenuHint
+    flags: Qt.Window | Qt.FramelessWindowHint | Qt.WindowMinMaxButtonsHint | Qt.WindowSystemMenuHint
 
     background: Rectangle {
         color: "#0B0C0E"
