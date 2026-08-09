@@ -120,9 +120,10 @@ class GNOMEHeaderBar(QFrame):
         self.btn_menu.clicked.connect(self.show_main_menu)
         layout.addWidget(self.btn_menu)
 
-        # Window Controls (Minimize, Close)
+        # Window Controls (Minimize, Maximize/Restore, Close)
         btn_min = QPushButton("—")
         btn_min.setFixedSize(26, 24)
+        btn_min.setToolTip("Minimize")
         btn_min.setStyleSheet(f"""
             QPushButton {{
                 border: none; background: transparent; color: {TEXT_SECONDARY};
@@ -133,8 +134,22 @@ class GNOMEHeaderBar(QFrame):
         btn_min.clicked.connect(self.parent_win.showMinimized)
         layout.addWidget(btn_min)
 
+        self.btn_max = QPushButton("☐")
+        self.btn_max.setFixedSize(26, 24)
+        self.btn_max.setToolTip("Maximize / Restore")
+        self.btn_max.setStyleSheet(f"""
+            QPushButton {{
+                border: none; background: transparent; color: {TEXT_SECONDARY};
+                font-size: 10pt; font-weight: bold; border-radius: 4px;
+            }}
+            QPushButton:hover {{ color: {TEXT_PRIMARY}; background-color: #262c39; }}
+        """)
+        self.btn_max.clicked.connect(self.parent_win.toggle_maximize)
+        layout.addWidget(self.btn_max)
+
         btn_close = QPushButton("✕")
         btn_close.setFixedSize(26, 24)
+        btn_close.setToolTip("Close")
         btn_close.setStyleSheet(f"""
             QPushButton {{
                 border: none; background: transparent; color: {TEXT_SECONDARY};
@@ -146,6 +161,9 @@ class GNOMEHeaderBar(QFrame):
         layout.addWidget(btn_close)
 
         self.drag_position = None
+
+    def update_max_button_icon(self, is_maximized: bool):
+        self.btn_max.setText("❐" if is_maximized else "☐")
 
     def set_active_segment(self, index: int):
         btns = [self.btn_seg_library, self.btn_seg_audio, self.btn_seg_reports, self.btn_seg_settings]
@@ -191,6 +209,11 @@ class GNOMEHeaderBar(QFrame):
             dlg = GNOMEAboutDialog(self.parent_win)
             dlg.exec()
 
+    def mouseDoubleClickEvent(self, event):
+        if event.button() == Qt.LeftButton:
+            self.parent_win.toggle_maximize()
+            event.accept()
+
     def mousePressEvent(self, event):
         if event.button() == Qt.LeftButton:
             self.drag_position = event.globalPosition().toPoint() - self.parent_win.frameGeometry().topLeft()
@@ -198,5 +221,6 @@ class GNOMEHeaderBar(QFrame):
 
     def mouseMoveEvent(self, event):
         if event.buttons() == Qt.LeftButton and self.drag_position is not None:
-            self.parent_win.move(event.globalPosition().toPoint() - self.drag_position)
+            if not self.parent_win.isMaximized():
+                self.parent_win.move(event.globalPosition().toPoint() - self.drag_position)
             event.accept()

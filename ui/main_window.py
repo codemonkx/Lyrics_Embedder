@@ -5,7 +5,7 @@ import tempfile
 from pathlib import Path
 from typing import List, Dict, Any, Optional
 
-from PySide6.QtCore import Qt, QThread, Signal, Slot, QPropertyAnimation, QRectF
+from PySide6.QtCore import Qt, QThread, Signal, Slot, QPropertyAnimation, QRectF, QRect, QPoint
 from PySide6.QtWidgets import (
     QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
     QLabel, QPushButton, QFileDialog, QTableWidget,
@@ -258,17 +258,21 @@ class EmbedWorker(QThread):
 
 class LyricForgeWindow(QMainWindow):
     """
-    Main LyricForge Nothing OS Desktop Application Window.
+    Main LyricForge Resizable Desktop Application Window.
     """
+    BORDER_MARGIN = 8
+
     def __init__(self, db_path: str = "lyricforge.db"):
         super().__init__()
         self.db = DBManager(db_path)
         self.mode = "lyrics"
-        self.setWindowTitle("LyricForge")
+        self.setWindowTitle("LyricForge Pro")
+        self.setMinimumSize(960, 600)
         
-        # Frameless window configuration
+        # Frameless window configuration with mouse tracking for border resize handles
         self.setWindowFlags(Qt.FramelessWindowHint | Qt.WindowSystemMenuHint)
         self.setAttribute(Qt.WA_TranslucentBackground, True)
+        self.setMouseTracking(True)
         
         # Window Icon
         icon_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "assets", "app_icon.png")
@@ -277,12 +281,18 @@ class LyricForgeWindow(QMainWindow):
 
         self.resize(1260, 800)
         self.setStyleSheet(NOTHING_OS_QSS)
+
+        self.drag_edge = None
+        self.drag_start_pos = QPoint()
+        self.drag_start_geo = QRect()
+
         self.init_ui()
 
     def init_ui(self):
         central = QWidget()
         central.setObjectName("central")
         central.setAttribute(Qt.WA_StyledBackground, True)
+        central.setMouseTracking(True)
         self.setCentralWidget(central)
 
         main_layout = QVBoxLayout(central)
@@ -297,6 +307,7 @@ class LyricForgeWindow(QMainWindow):
 
         # 2. Main Body Container (Sidebar + Stacked Content Workspaces)
         body_widget = QWidget()
+        body_widget.setMouseTracking(True)
         body_layout = QHBoxLayout(body_widget)
         body_layout.setContentsMargins(0, 0, 0, 0)
         body_layout.setSpacing(0)
@@ -326,6 +337,88 @@ class LyricForgeWindow(QMainWindow):
         self.toast = GNOMEToast(self)
 
         self.load_table_data()
+
+    # =========================================================================
+    # FRAMELESS WINDOW RESIZING & MAXIMIZE LOGIC
+    # =========================================================================
+
+    def toggle_maximize(self):
+        if self.isMaximized():
+            self.showNormal()
+            self.header_bar.update_max_button_icon(False)
+        else:
+            self.showMaximized()
+            self.header_bar.update_max_button_icon(True)
+
+    def get_edge_at(self, pos: QPoint) -> Optional[str]:
+        if self.isMaximized():
+            return None
+        w, h = self.width(), self.height()
+        m = self.BORDER_MARGIN
+        edge = []
+        if pos.y() <= m:
+            edge.append("top")
+        elif pos.y() >= h - m:
+            edge.append("bottom")
+        if pos.x() <= m:
+            edge.append("left")
+        elif pos.x() >= w - m:
+            edge.append("right")
+        return "-".join(edge) if edge else None
+
+    def update_cursor_for_edge(self, edge: Optional[str]):
+        if edge in ["top-left", "bottom-right"]:
+            self.setCursor(Qt.SizeFDiagCursor)
+        elif edge in ["top-right", "bottom-left"]:
+            self.setCursor(Qt.SizeBDiagCursor)
+        elif edge in ["left", "right"]:
+            self.setCursor(Qt.SizeHorCursor)
+        elif edge in ["top", "bottom"]:
+            self.setCursor(Qt.SizeVerCursor)
+        else:
+            self.setCursor(Qt.ArrowCursor)
+
+    def mousePressEvent(self, event):
+        if event.button() == Qt.LeftButton and not self.isMaximized():
+            edge = self.get_edge_at(event.position().toPoint())
+            if edge:
+                self.drag_edge = edge
+                self.drag_start_pos = event.globalPosition().toPoint()
+                self.drag_start_geo = self.geometry()
+                event.accept()
+                return
+        super().mousePressEvent(event)
+
+    def mouseMoveEvent(self, event):
+        if not self.isMaximized():
+            pos = event.position().toPoint()
+            if event.buttons() & Qt.LeftButton and self.drag_edge:
+                delta = event.globalPosition().toPoint() - self.drag_start_pos
+                rect = QRect(self.drag_start_geo)
+
+                if "left" in self.drag_edge:
+                    new_w = max(self.minimumWidth(), rect.width() - delta.x())
+                    rect.setLeft(rect.right() - new_w)
+                elif "right" in self.drag_edge:
+                    rect.setWidth(max(self.minimumWidth(), self.drag_start_geo.width() + delta.x()))
+
+                if "top" in self.drag_edge:
+                    new_h = max(self.minimumHeight(), rect.height() - delta.y())
+                    rect.setTop(rect.bottom() - new_h)
+                elif "bottom" in self.drag_edge:
+                    rect.setHeight(max(self.minimumHeight(), self.drag_start_geo.height() + delta.y()))
+
+                self.setGeometry(rect)
+                event.accept()
+                return
+            else:
+                edge = self.get_edge_at(pos)
+                self.update_cursor_for_edge(edge)
+        super().mouseMoveEvent(event)
+
+    def mouseReleaseEvent(self, event):
+        self.drag_edge = None
+        super().mouseReleaseEvent(event)
 
     # =========================================================================
     # WORKSPACE PAGES BUILDERS
@@ -472,7 +565,7 @@ class LyricForgeWindow(QMainWindow):
 
         # Track Hero Card Header (Nothing OS Glyph Style)
         hero_box = QFrame()
-        hero_box.setStyleSheet("background-color: #0c0c0c; border: 1px solid #262626; border-radius: 8px; padding: 12px;")
+        hero_box.setStyleSheet("background-color: #0e1014; border: 1px solid #292d38; border-radius: 8px; padding: 12px;")
         hero_lay = QHBoxLayout(hero_box)
         hero_lay.setContentsMargins(8, 8, 8, 8)
         hero_lay.setSpacing(12)
@@ -1320,9 +1413,9 @@ class LyricForgeWindow(QMainWindow):
         meta_txt = (
             f"<b style='font-size: 11pt;'>{song['title'] or Path(song['file_path']).name}</b><br>"
             f"<span style='color: {TEXT_SECONDARY};'>{song['artist'] or 'Unknown Artist'} — {song['album'] or 'Unknown Album'}</span><br><br>"
-            f"<span style='background: #1c1c1c; color: {ACCENT_RED}; border: 1px solid #3d1015; border-radius: 4px; padding: 2px 6px; font-weight: bold;'>{ext}</span> "
-            f"<span style='background: #1c1c1c; color: #ffffff; border-radius: 4px; padding: 2px 6px;'>{bits_txt} / {sr_txt}</span> "
-            f"<span style='background: #1c1c1c; color: #ffffff; border-radius: 4px; padding: 2px 6px;'>{size_mb:.1f} MB</span>"
+            f"<span style='background: #1c1f28; color: {ACCENT_RED}; border: 1px solid #3d141b; border-radius: 4px; padding: 2px 6px; font-weight: bold;'>{ext}</span> "
+            f"<span style='background: #1c1f28; color: #ffffff; border-radius: 4px; padding: 2px 6px;'>{bits_txt} / {sr_txt}</span> "
+            f"<span style='background: #1c1f28; color: #ffffff; border-radius: 4px; padding: 2px 6px;'>{size_mb:.1f} MB</span>"
         )
         self.meta_info_lbl.setText(meta_txt)
         
@@ -1501,7 +1594,7 @@ class LyricForgeWindow(QMainWindow):
                 
                 plt.figure(figsize=(5.5, 2.8))
                 plt.plot(frequencies / 1000.0, magnitudes_db, color='#ff002b', alpha=0.85)
-                plt.axhline(y=threshold_db, color='#888888', linestyle='--', alpha=0.7)
+                plt.axhline(y=threshold_db, color='#8a8d9b', linestyle='--', alpha=0.7)
                 plt.axvline(x=cutoff / 1000.0, color='#34d399', linestyle='-.', linewidth=1.5)
                 
                 plt.title(method_title, fontsize=9, color='white', fontweight='bold')
@@ -1511,18 +1604,18 @@ class LyricForgeWindow(QMainWindow):
                 plt.ylim(-100, 5)
                 
                 fig = plt.gcf()
-                fig.patch.set_facecolor('#000000')
+                fig.patch.set_facecolor('#0b0c0e')
                 ax = plt.gca()
-                ax.set_facecolor('#121212')
-                ax.spines['bottom'].set_color('#262626')
-                ax.spines['top'].set_color('#262626')
-                ax.spines['left'].set_color('#262626')
-                ax.spines['right'].set_color('#262626')
+                ax.set_facecolor('#16181d')
+                ax.spines['bottom'].set_color('#292d38')
+                ax.spines['top'].set_color('#292d38')
+                ax.spines['left'].set_color('#292d38')
+                ax.spines['right'].set_color('#292d38')
                 ax.tick_params(colors='white', labelsize=8)
-                ax.grid(True, color='#222222', linestyle=':', alpha=0.6)
+                ax.grid(True, color='#222630', linestyle=':', alpha=0.6)
                 
                 plt.tight_layout()
-                plt.savefig(temp_img, facecolor='#000000', dpi=100)
+                plt.savefig(temp_img, facecolor='#0b0c0e', dpi=100)
                 plt.close()
                 
                 pixmap = QPixmap(temp_img)
