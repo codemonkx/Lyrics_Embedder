@@ -5,7 +5,7 @@ import tempfile
 from pathlib import Path
 from typing import List, Dict, Any, Optional
 
-from PySide6.QtCore import Qt, QThread, Signal, Slot, QPropertyAnimation, QRectF, QRect, QPoint
+from PySide6.QtCore import Qt, QThread, Signal, Slot, QPropertyAnimation, QRectF, QRect, QPoint, QEvent
 from PySide6.QtWidgets import (
     QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
     QLabel, QPushButton, QFileDialog, QTableWidget,
@@ -14,6 +14,10 @@ from PySide6.QtWidgets import (
     QButtonGroup, QLineEdit, QScrollArea, QMenu, QComboBox
 )
 from PySide6.QtGui import QFont, QColor, QBrush, QIcon, QPainter, QPixmap
+
+if sys.platform == "win32":
+    import ctypes
+    from ctypes import wintypes
 
 from core.db_manager import DBManager
 from core.scanner import FileScanner
@@ -272,7 +276,6 @@ class LyricForgeWindow(QMainWindow):
         # Frameless window configuration with mouse tracking for border resize handles
         self.setWindowFlags(Qt.FramelessWindowHint | Qt.WindowSystemMenuHint)
         self.setAttribute(Qt.WA_TranslucentBackground, True)
-        self.setMouseTracking(True)
         
         # Window Icon
         icon_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "assets", "app_icon.png")
@@ -292,7 +295,6 @@ class LyricForgeWindow(QMainWindow):
         central = QWidget()
         central.setObjectName("central")
         central.setAttribute(Qt.WA_StyledBackground, True)
-        central.setMouseTracking(True)
         self.setCentralWidget(central)
 
         main_layout = QVBoxLayout(central)
@@ -307,7 +309,6 @@ class LyricForgeWindow(QMainWindow):
 
         # 2. Main Body Container (Sidebar + Stacked Content Workspaces)
         body_widget = QWidget()
-        body_widget.setMouseTracking(True)
         body_layout = QHBoxLayout(body_widget)
         body_layout.setContentsMargins(0, 0, 0, 0)
         body_layout.setSpacing(0)
@@ -339,7 +340,7 @@ class LyricForgeWindow(QMainWindow):
         self.load_table_data()
 
     # =========================================================================
-    # FRAMELESS WINDOW RESIZING & MAXIMIZE LOGIC
+    # NATIVE WINDOW RESIZING & MAXIMIZE LOGIC
     # =========================================================================
 
     def toggle_maximize(self):
@@ -350,75 +351,54 @@ class LyricForgeWindow(QMainWindow):
             self.showMaximized()
             self.header_bar.update_max_button_icon(True)
 
-    def get_edge_at(self, pos: QPoint) -> Optional[str]:
-        if self.isMaximized():
-            return None
-        w, h = self.width(), self.height()
-        m = self.BORDER_MARGIN
-        edge = []
-        if pos.y() <= m:
-            edge.append("top")
-        elif pos.y() >= h - m:
-            edge.append("bottom")
-        if pos.x() <= m:
-            edge.append("left")
-        elif pos.x() >= w - m:
-            edge.append("right")
-        return "-".join(edge) if edge else None
+    if sys.platform == "win32":
+        def nativeEvent(self, eventType, message):
+            if eventType in (b"windows_generic_MSG", "windows_generic_MSG"):
+                msg = ctypes.wintypes.MSG.from_address(message.__int__())
+                WM_NCHITTEST = 0x0084
+                if msg.message == WM_NCHITTEST and not self.isMaximized():
+                    x = (msg.lParam & 0xFFFF)
+                    y = ((msg.lParam >> 16) & 0xFFFF)
+                    
+                    if x > 32767:
+                        x -= 65536
+                    if y > 32767:
+                        y -= 65536
+                        
+                    local_pos = self.mapFromGlobal(QPoint(x, y))
+                    lx = local_pos.x()
+                    ly = local_pos.y()
+                    w = self.width()
+                    h = self.height()
+                    m = self.BORDER_MARGIN
+                    
+                    HTLEFT = 10
+                    HTRIGHT = 11
+                    HTTOP = 12
+                    HTTOPLEFT = 13
+                    HTTOPRIGHT = 14
+                    HTBOTTOM = 15
+                    HTBOTTOMLEFT = 16
+                    HTBOTTOMRIGHT = 17
+                    
+                    if lx < m and ly < m:
+                        return True, HTTOPLEFT
+                    elif lx > w - m and ly < m:
+                        return True, HTTOPRIGHT
+                    elif lx < m and ly > h - m:
+                        return True, HTBOTTOMLEFT
+                    elif lx > w - m and ly > h - m:
+                        return True, HTBOTTOMRIGHT
+                    elif lx < m:
+                        return True, HTLEFT
+                    elif lx > w - m:
+                        return True, HTRIGHT
+                    elif ly < m:
+                        return True, HTTOP
+                    elif ly > h - m:
+                        return True, HTBOTTOM
 
-    def update_cursor_for_edge(self, edge: Optional[str]):
-        if edge in ["top-left", "bottom-right"]:
-            self.setCursor(Qt.SizeFDiagCursor)
-        elif edge in ["top-right", "bottom-left"]:
-            self.setCursor(Qt.SizeBDiagCursor)
-        elif edge in ["left", "right"]:
-            self.setCursor(Qt.SizeHorCursor)
-        elif edge in ["top", "bottom"]:
-            self.setCursor(Qt.SizeVerCursor)
-        else:
-            self.setCursor(Qt.ArrowCursor)
-
-    def mousePressEvent(self, event):
-        if event.button() == Qt.LeftButton and not self.isMaximized():
-            edge = self.get_edge_at(event.position().toPoint())
-            if edge:
-                self.drag_edge = edge
-                self.drag_start_pos = event.globalPosition().toPoint()
-                self.drag_start_geo = self.geometry()
-                event.accept()
-                return
-        super().mousePressEvent(event)
-
-    def mouseMoveEvent(self, event):
-        if not self.isMaximized():
-            pos = event.position().toPoint()
-            if event.buttons() & Qt.LeftButton and self.drag_edge:
-                delta = event.globalPosition().toPoint() - self.drag_start_pos
-                rect = QRect(self.drag_start_geo)
-
-                if "left" in self.drag_edge:
-                    new_w = max(self.minimumWidth(), rect.width() - delta.x())
-                    rect.setLeft(rect.right() - new_w)
-                elif "right" in self.drag_edge:
-                    rect.setWidth(max(self.minimumWidth(), self.drag_start_geo.width() + delta.x()))
-
-                if "top" in self.drag_edge:
-                    new_h = max(self.minimumHeight(), rect.height() - delta.y())
-                    rect.setTop(rect.bottom() - new_h)
-                elif "bottom" in self.drag_edge:
-                    rect.setHeight(max(self.minimumHeight(), self.drag_start_geo.height() + delta.y()))
-
-                self.setGeometry(rect)
-                event.accept()
-                return
-            else:
-                edge = self.get_edge_at(pos)
-                self.update_cursor_for_edge(edge)
-        super().mouseMoveEvent(event)
-
-    def mouseReleaseEvent(self, event):
-        self.drag_edge = None
-        super().mouseReleaseEvent(event)
+            return super().nativeEvent(eventType, message)
 
     # =========================================================================
     # WORKSPACE PAGES BUILDERS
