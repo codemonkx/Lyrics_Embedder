@@ -54,7 +54,7 @@ ApplicationWindow {
         anchors.fill: parent
         spacing: 0
 
-        // Custom Frameless HeaderBar
+        // Custom Frameless HeaderBar (Draggable via window.startSystemMove())
         Rectangle {
             Layout.fillWidth: true
             Layout.preferredHeight: 44
@@ -64,6 +64,7 @@ ApplicationWindow {
 
             MouseArea {
                 anchors.fill: parent
+                onPressed: window.startSystemMove()
                 onDoubleClicked: {
                     if (window.visibility === Window.Maximized) window.showNormal()
                     else window.showMaximized()
@@ -192,5 +193,67 @@ ApplicationWindow {
                 SettingsPage { id: settingsPage }
             }
         }
+    }
+
+    // 8-Directional Frameless Border Edge Resize Handles
+    MouseArea {
+        anchors.top: parent.top
+        anchors.left: parent.left
+        anchors.right: parent.right
+        height: 6
+        cursorShape: Qt.SizeVerCursor
+        onPressed: window.startSystemResize(Qt.TopEdge)
+    }
+    MouseArea {
+        anchors.bottom: parent.bottom
+        anchors.left: parent.left
+        anchors.right: parent.right
+        height: 6
+        cursorShape: Qt.SizeVerCursor
+        onPressed: window.startSystemResize(Qt.BottomEdge)
+    }
+    MouseArea {
+        anchors.top: parent.top
+        anchors.bottom: parent.bottom
+        anchors.left: parent.left
+        width: 6
+        cursorShape: Qt.SizeHorCursor
+        onPressed: window.startSystemResize(Qt.LeftEdge)
+    }
+    MouseArea {
+        anchors.top: parent.top
+        anchors.bottom: parent.bottom
+        anchors.right: parent.right
+        width: 6
+        cursorShape: Qt.SizeHorCursor
+        onPressed: window.startSystemResize(Qt.RightEdge)
+    }
+    MouseArea {
+        anchors.top: parent.top
+        anchors.left: parent.left
+        width: 10; height: 10
+        cursorShape: Qt.SizeFDiagCursor
+        onPressed: window.startSystemResize(Qt.TopEdge | Qt.LeftEdge)
+    }
+    MouseArea {
+        anchors.top: parent.top
+        anchors.right: parent.right
+        width: 10; height: 10
+        cursorShape: Qt.SizeBDiagCursor
+        onPressed: window.startSystemResize(Qt.TopEdge | Qt.RightEdge)
+    }
+    MouseArea {
+        anchors.bottom: parent.bottom
+        anchors.left: parent.left
+        width: 10; height: 10
+        cursorShape: Qt.SizeBDiagCursor
+        onPressed: window.startSystemResize(Qt.BottomEdge | Qt.LeftEdge)
+    }
+    MouseArea {
+        anchors.bottom: parent.bottom
+        anchors.right: parent.right
+        width: 10; height: 10
+        cursorShape: Qt.SizeFDiagCursor
+        onPressed: window.startSystemResize(Qt.BottomEdge | Qt.RightEdge)
     }
 }
