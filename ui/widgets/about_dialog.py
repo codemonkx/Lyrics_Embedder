@@ -11,17 +11,17 @@ from ui.theme import (
 
 class GNOMEAboutDialog(QDialog):
     """
-    Nothing OS-inspired About Modal Dialog.
+    Nothing Tech Commercial Product About Modal Dialog.
     """
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.setWindowTitle("About LyricForge")
-        self.setFixedSize(380, 430)
+        self.setWindowTitle("About LyricForge Pro")
+        self.setFixedSize(390, 440)
         self.setWindowFlags(Qt.Dialog | Qt.FramelessWindowHint)
         self.setAttribute(Qt.WA_TranslucentBackground, True)
 
         main_card = QFrame(self)
-        main_card.setGeometry(0, 0, 380, 430)
+        main_card.setGeometry(0, 0, 390, 440)
         main_card.setStyleSheet(f"""
             QFrame {{
                 background-color: {BG_SURFACE};
@@ -47,21 +47,21 @@ class GNOMEAboutDialog(QDialog):
         lbl_icon.setAlignment(Qt.AlignCenter)
         layout.addWidget(lbl_icon)
 
-        # App Title (Nothing OS Style)
-        lbl_title = QLabel("NOTHING // LYRICFORGE")
+        # App Title (Nothing Tech Style)
+        lbl_title = QLabel("NOTHING // LYRICFORGE PRO")
         lbl_title.setStyleSheet(f"font-size: 13pt; font-weight: 900; color: {TEXT_PRIMARY}; letter-spacing: 1.5px;")
         lbl_title.setAlignment(Qt.AlignCenter)
         layout.addWidget(lbl_title)
 
         # Version Badge
-        lbl_ver = QLabel("VERSION 1.2.0 (NOTHING OS EDITION)")
+        lbl_ver = QLabel("VERSION 1.2.0 PRO (COMMERCIAL EDITION)")
         lbl_ver.setStyleSheet(f"font-size: 8pt; color: {ACCENT_RED}; font-weight: 800; letter-spacing: 1px;")
         lbl_ver.setAlignment(Qt.AlignCenter)
         layout.addWidget(lbl_ver)
 
         # Description
         lbl_desc = QLabel(
-            "High-tech stealth lyrics matcher, tag embedder, and audio spectral verification utility engineered for modern desktop environments."
+            "Commercial stealth synchronized lyrics matcher, tag embedder, and lossless audio spectral integrity analyzer."
         )
         lbl_desc.setStyleSheet(f"font-size: 9pt; color: {TEXT_SECONDARY}; line-height: 18px;")
         lbl_desc.setWordWrap(True)
@@ -74,7 +74,7 @@ class GNOMEAboutDialog(QDialog):
         btn_github = QPushButton("🌐 VIEW ON GITHUB")
         btn_github.setStyleSheet(f"""
             QPushButton {{
-                background-color: #1a080a;
+                background-color: #1e0b0e;
                 border: 1px solid {ACCENT_RED};
                 border-radius: 8px;
                 padding: 7px 16px;

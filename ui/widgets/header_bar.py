@@ -12,7 +12,7 @@ from ui.widgets.about_dialog import GNOMEAboutDialog
 
 class GNOMEHeaderBar(QFrame):
     """
-    Nothing OS-style HeaderBar component with Libadwaita ViewSwitcher, search filter, Hamburger menu, and window controls.
+    Nothing Tech Commercial Product HeaderBar component with ViewSwitcher, search filter, Hamburger menu, and window controls.
     """
     page_changed = Signal(int)
     search_changed = Signal(str)
@@ -41,21 +41,21 @@ class GNOMEHeaderBar(QFrame):
         lbl_red_dot.setStyleSheet(f"font-size: 10pt; color: {ACCENT_RED}; border: none;")
         layout.addWidget(lbl_red_dot)
 
-        app_title = QLabel("NOTHING [LYRICFORGE]")
+        app_title = QLabel("NOTHING // LYRICFORGE PRO")
         app_title.setStyleSheet(f"font-weight: 900; font-size: 10.5pt; color: {TEXT_PRIMARY}; letter-spacing: 1.5px; border: none;")
         layout.addWidget(app_title)
 
-        ver_badge = QLabel("v1.2")
-        ver_badge.setStyleSheet(f"font-size: 7.5pt; color: {ACCENT_RED}; background: #161616; border: 1px solid #331015; border-radius: 4px; padding: 2px 6px; font-weight: 800;")
+        ver_badge = QLabel("v1.2 PRO")
+        ver_badge.setStyleSheet(f"font-size: 7.5pt; color: {ACCENT_RED}; background: #1a1e28; border: 1px solid #3d141b; border-radius: 4px; padding: 2px 6px; font-weight: 800;")
         layout.addWidget(ver_badge)
 
         layout.addStretch()
 
-        # 2. Center Section: Nothing OS Capsule ViewSwitcher
+        # 2. Center Section: Nothing Tech Segmented ViewSwitcher
         switcher_frame = QFrame()
         switcher_frame.setStyleSheet(f"""
             QFrame {{
-                background-color: #121212;
+                background-color: #14171d;
                 border: 1px solid {BORDER_SUBTLE};
                 border-radius: 8px;
             }}
@@ -112,10 +112,10 @@ class GNOMEHeaderBar(QFrame):
         self.btn_menu.setFixedSize(32, 28)
         self.btn_menu.setStyleSheet(f"""
             QPushButton {{
-                border: 1px solid {BORDER_SUBTLE}; background-color: #161616;
+                border: 1px solid {BORDER_SUBTLE}; background-color: #1a1e27;
                 color: {TEXT_PRIMARY}; font-size: 12pt; font-weight: bold; border-radius: 6px;
             }}
-            QPushButton:hover {{ background-color: #242424; }}
+            QPushButton:hover {{ background-color: #262c39; }}
         """)
         self.btn_menu.clicked.connect(self.show_main_menu)
         layout.addWidget(self.btn_menu)
@@ -128,7 +128,7 @@ class GNOMEHeaderBar(QFrame):
                 border: none; background: transparent; color: {TEXT_SECONDARY};
                 font-size: 9pt; font-weight: bold; border-radius: 4px;
             }}
-            QPushButton:hover {{ color: {TEXT_PRIMARY}; background-color: #242424; }}
+            QPushButton:hover {{ color: {TEXT_PRIMARY}; background-color: #262c39; }}
         """)
         btn_min.clicked.connect(self.parent_win.showMinimized)
         layout.addWidget(btn_min)
@@ -174,7 +174,7 @@ class GNOMEHeaderBar(QFrame):
         act_prefs = menu.addAction("⚙️ PREFERENCES...")
         menu.addSeparator()
         
-        act_about = menu.addAction("ℹ️ ABOUT LYRICFORGE")
+        act_about = menu.addAction("ℹ️ ABOUT LYRICFORGE PRO")
 
         pos = self.btn_menu.mapToGlobal(self.btn_menu.rect().bottomLeft())
         action = menu.exec(pos)
