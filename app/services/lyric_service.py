@@ -1,6 +1,7 @@
 from typing import List, Dict, Any
 from PySide6.QtCore import QObject, Signal, Slot
 from app.database.database import DatabaseManager
+from app.database.models import SongModel
 from app.database.repositories import TrackRepository, LyricRepository, MatchRepository
 from app.lyrics.parser import LyricParser
 from app.models.lyric import Lyric
@@ -23,13 +24,13 @@ class LyricService(QObject):
     def getLyricPreview(self, song_id: int) -> str:
         session = self.db_manager.get_session()
         try:
-            track = session.query(TrackRepository(session).session.query(SongModel).get(song_id))
             song = session.query(SongModel).get(song_id)
             if song and song.lyric:
                 data = LyricParser.parse_file(song.lyric.file_path)
                 return data.get("plain_text_preview", "")
             return "[No lyrics matched for this track.]"
-        except Exception:
+        except Exception as e:
+            logger.error(f"Error getting lyric preview: {e}")
             return "[Error loading lyric file.]"
         finally:
             session.close()

@@ -21,6 +21,35 @@ ApplicationWindow {
         border.width: 1
     }
 
+    // Global Keyboard Shortcuts (Ctrl+K, Ctrl+F, Ctrl+R, Esc)
+    Shortcut {
+        sequence: "Ctrl+K"
+        onActivated: searchInputGlobal.forceActiveFocus()
+    }
+    Shortcut {
+        sequence: "Ctrl+F"
+        onActivated: searchInputGlobal.forceActiveFocus()
+    }
+    Shortcut {
+        sequence: "Ctrl+R"
+        onActivated: {
+            if (typeof libraryService !== "undefined" && libraryService && typeof configManager !== "undefined" && configManager) {
+                libraryService.startScan(
+                    configManager.get("music_dir", ""),
+                    configManager.get("lyrics_dir", ""),
+                    configManager.get("threshold", 60.0),
+                    configManager.get("verify_audio", true)
+                )
+            }
+        }
+    }
+    Shortcut {
+        sequence: "Escape"
+        onActivated: {
+            if (libraryPage.selectedTrack) libraryPage.selectedTrack = null
+        }
+    }
+
     ColumnLayout {
         anchors.fill: parent
         spacing: 0
@@ -71,6 +100,39 @@ ApplicationWindow {
                 }
 
                 Item { Layout.fillWidth: true }
+
+                // Search Bar Input (Ctrl+K)
+                Rectangle {
+                    width: 220; height: 28; radius: 14
+                    color: "#121417"
+                    border.color: searchInputGlobal.activeFocus ? "#FF002B" : "#272A2F"
+
+                    Row {
+                        anchors.fill: parent
+                        anchors.leftMargin: 10
+                        anchors.rightMargin: 10
+                        spacing: 6
+
+                        Text { text: "🔍"; font.pixelSize: 10; anchors.verticalCenter: parent.verticalCenter }
+
+                        TextInput {
+                            id: searchInputGlobal
+                            width: parent.width - 40
+                            anchors.verticalCenter: parent.verticalCenter
+                            font.pixelSize: 11
+                            color: "#F2F2F2"
+                            selectByMouse: true
+
+                            Text {
+                                text: "Search (Ctrl+K)..."
+                                font.pixelSize: 11
+                                color: "#62666D"
+                                visible: searchInputGlobal.text.length === 0
+                                anchors.verticalCenter: parent.verticalCenter
+                            }
+                        }
+                    }
+                }
 
                 // Window Control Buttons
                 RowLayout {
@@ -124,10 +186,10 @@ ApplicationWindow {
                 Layout.fillHeight: true
                 currentIndex: 0
 
-                LibraryPage {}
-                AnalysisPage {}
-                ReportsPage {}
-                SettingsPage {}
+                LibraryPage { id: libraryPage }
+                AnalysisPage { id: analysisPage }
+                ReportsPage { id: reportsPage }
+                SettingsPage { id: settingsPage }
             }
         }
     }

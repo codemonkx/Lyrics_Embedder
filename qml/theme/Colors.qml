@@ -17,6 +17,11 @@ QtObject {
     readonly property color textMuted: "#62666D"
 
     readonly property color success: "#34D399"
+    readonly property color successBg: "#132A1C"
+    
     readonly property color warning: "#FBBF24"
+    readonly property color warningBg: "#332200"
+
     readonly property color error: "#F87171"
+    readonly property color errorBg: "#2A0910"
 }

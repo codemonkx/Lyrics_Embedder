@@ -5,6 +5,7 @@ from pathlib import Path
 
 from PySide6.QtGui import QGuiApplication, QFont
 from PySide6.QtQml import QQmlApplicationEngine
+from PySide6.QtQuickControls2 import QQuickStyle
 from PySide6.QtCore import QUrl
 
 from app.core.constants import APP_NAME, APP_VERSION
@@ -19,6 +20,9 @@ from app.audio.spectrum import SpectrumImageProvider
 
 def run_qml_gui():
     setup_platform_integration()
+
+    # Set QQuickStyle to Basic to allow custom button/control themes without Qt warnings
+    QQuickStyle.setStyle("Basic")
 
     app = QGuiApplication(sys.argv)
     app.setOrganizationName("LyricForge")
@@ -38,7 +42,7 @@ def run_qml_gui():
     # Register Spectrum Image Provider Bridge (image://spectrum/file_path)
     engine.addImageProvider("spectrum", SpectrumImageProvider())
 
-    # Expose Services to QML Context
+    # Expose Services to QML Context BEFORE loading Main.qml
     context = engine.rootContext()
     context.setContextProperty("libraryService", library_service)
     context.setContextProperty("lyricService", lyric_service)
