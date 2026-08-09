@@ -3,7 +3,7 @@ import sys
 import argparse
 from pathlib import Path
 
-from PySide6.QtGui import QGuiApplication, QFont
+from PySide6.QtWidgets import QApplication
 from PySide6.QtQml import QQmlApplicationEngine
 from PySide6.QtQuickControls2 import QQuickStyle
 from PySide6.QtCore import QUrl
@@ -24,7 +24,8 @@ def run_qml_gui():
     # Set QQuickStyle to Basic to allow custom button/control themes without Qt warnings
     QQuickStyle.setStyle("Basic")
 
-    app = QGuiApplication(sys.argv)
+    # Must use QApplication instead of QGuiApplication to support QFileDialog and QWidget modals seamlessly
+    app = QApplication(sys.argv)
     app.setOrganizationName("LyricForge")
     app.setApplicationName(APP_NAME)
 
