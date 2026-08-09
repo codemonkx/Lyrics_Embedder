@@ -8,18 +8,33 @@ Item {
 
     ScrollView {
         anchors.fill: parent
-        anchors.margins: 20
-        contentWidth: parent.width - 40
+        anchors.margins: 16
+        contentWidth: parent.width - 32
 
         ColumnLayout {
             width: parent.width
-            spacing: 20
+            spacing: 16
 
-            Text {
-                text: ":: PREFERENCES & CONFIGURATION ::"
-                font.pixelSize: 16
-                font.weight: Font.Black
-                color: "#F2F2F2"
+            // Header
+            RowLayout {
+                Layout.fillWidth: true
+                spacing: 12
+
+                Text {
+                    text: "SYSTEM PREFERENCES"
+                    font.pixelSize: 14
+                    font.weight: Font.Black
+                    font.letterSpacing: 1.0
+                    color: "#F2F2F2"
+                }
+
+                Text { text: "•"; color: "#62666D" }
+
+                Text {
+                    text: "Configure library folders, real-time filesystem monitoring, and database management"
+                    font.pixelSize: 12
+                    color: "#92969D"
+                }
             }
 
             // Group 1: Music Folders
@@ -33,35 +48,67 @@ Item {
                     spacing: 12
 
                     Text {
-                        text: ":: MUSIC & LYRICS DIRECTORIES ::"
-                        font.pixelSize: 11
+                        text: "MUSIC & LYRICS DIRECTORIES"
+                        font.pixelSize: 10
                         font.weight: Font.Bold
                         color: "#FF002B"
                     }
 
                     RowLayout {
                         Layout.fillWidth: true
+                        spacing: 12
+
                         Text { text: "Music Directory:"; font.pixelSize: 12; color: "#F2F2F2"; Layout.preferredWidth: 120 }
+                        
                         TextField {
                             id: musicDirInput
                             Layout.fillWidth: true
-                            text: configManager.get("music_dir", "")
+                            text: typeof configManager !== "undefined" && configManager ? configManager.get("music_dir", "") : ""
                             color: "#F2F2F2"
                             background: Rectangle { color: "#0B0C0E"; radius: 4; border.color: "#272A2F" }
-                            onEditingFinished: configManager.set("music_dir", musicDirInput.text)
+                            onEditingFinished: {
+                                if (typeof configManager !== "undefined" && configManager) {
+                                    configManager.set("music_dir", musicDirInput.text)
+                                }
+                            }
+                        }
+
+                        PillButton {
+                            text: "📁 BROWSE"
+                            onClicked: {
+                                if (typeof libraryService !== "undefined" && libraryService) {
+                                    libraryService.browseFolder("music")
+                                }
+                            }
                         }
                     }
 
                     RowLayout {
                         Layout.fillWidth: true
+                        spacing: 12
+
                         Text { text: "Lyrics Directory:"; font.pixelSize: 12; color: "#F2F2F2"; Layout.preferredWidth: 120 }
+                        
                         TextField {
                             id: lyricsDirInput
                             Layout.fillWidth: true
-                            text: configManager.get("lyrics_dir", "")
+                            text: typeof configManager !== "undefined" && configManager ? configManager.get("lyrics_dir", "") : ""
                             color: "#F2F2F2"
                             background: Rectangle { color: "#0B0C0E"; radius: 4; border.color: "#272A2F" }
-                            onEditingFinished: configManager.set("lyrics_dir", lyricsDirInput.text)
+                            onEditingFinished: {
+                                if (typeof configManager !== "undefined" && configManager) {
+                                    configManager.set("lyrics_dir", lyricsDirInput.text)
+                                }
+                            }
+                        }
+
+                        PillButton {
+                            text: "📝 BROWSE"
+                            onClicked: {
+                                if (typeof libraryService !== "undefined" && libraryService) {
+                                    libraryService.browseFolder("lyrics")
+                                }
+                            }
                         }
                     }
                 }
@@ -78,16 +125,20 @@ Item {
                     spacing: 12
 
                     Text {
-                        text: ":: REAL-TIME MONITORING & SAFETY ::"
-                        font.pixelSize: 11
+                        text: "REAL-TIME MONITORING & SAFETY"
+                        font.pixelSize: 10
                         font.weight: Font.Bold
                         color: "#FF002B"
                     }
 
                     CheckBox {
                         text: "Enable Watchdog Real-Time Library Monitoring (Debounced 500ms)"
-                        checked: configManager.get("monitoring_enabled", false)
-                        onCheckedChanged: configManager.set("monitoring_enabled", checked)
+                        checked: typeof configManager !== "undefined" && configManager ? configManager.get("monitoring_enabled", false) : false
+                        onCheckedChanged: {
+                            if (typeof configManager !== "undefined" && configManager) {
+                                configManager.set("monitoring_enabled", checked)
+                            }
+                        }
                     }
                 }
             }
@@ -96,7 +147,11 @@ Item {
             PillButton {
                 text: "⚠️ RESET DATABASE & CACHE"
                 isDestructive: true
-                onClicked: libraryService.resetLibrary()
+                onClicked: {
+                    if (typeof libraryService !== "undefined" && libraryService) {
+                        libraryService.resetLibrary()
+                    }
+                }
             }
         }
     }

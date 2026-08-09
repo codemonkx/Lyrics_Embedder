@@ -38,12 +38,13 @@ Rectangle {
         }
 
         // Empty state when no track selected
-        Column {
+        ColumnLayout {
             Layout.fillWidth: true
             Layout.fillHeight: true
             visible: inspectorRoot.track === null
             spacing: 12
-            anchors.centerIn: parent
+
+            Item { Layout.fillHeight: true }
 
             Text {
                 text: "Select a track from the library list to inspect metadata, lyrics, and audio spectrum profile."
@@ -51,8 +52,11 @@ Rectangle {
                 color: "#62666D"
                 horizontalAlignment: Text.AlignHCenter
                 wrapMode: Text.WordWrap
-                width: parent.width - 32
+                Layout.fillWidth: true
+                Layout.alignment: Qt.AlignCenter
             }
+
+            Item { Layout.fillHeight: true }
         }
 
         // Active Track Metadata Content

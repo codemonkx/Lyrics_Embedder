@@ -8,30 +8,46 @@ Item {
 
     ColumnLayout {
         anchors.fill: parent
-        anchors.margins: 20
-        spacing: 16
+        anchors.margins: 16
+        spacing: 12
 
-        Text {
-            text: ":: REPORTS & LOGS ::"
-            font.pixelSize: 16
-            font.weight: Font.Black
-            color: "#F2F2F2"
+        // Header
+        RowLayout {
+            Layout.fillWidth: true
+            spacing: 12
+
+            Text {
+                text: "REPORTS & PROCESS LOGS"
+                font.pixelSize: 14
+                font.weight: Font.Black
+                font.letterSpacing: 1.0
+                color: "#F2F2F2"
+            }
+
+            Text { text: "•"; color: "#62666D" }
+
+            Text {
+                text: "Export library statistics and monitor real-time background threads"
+                font.pixelSize: 12
+                color: "#92969D"
+            }
         }
 
+        // Export Actions Card
         GlassCard {
             Layout.fillWidth: true
-            Layout.preferredHeight: 90
+            Layout.preferredHeight: 84
 
             ColumnLayout {
                 anchors.fill: parent
-                anchors.margins: 16
-                spacing: 8
+                anchors.margins: 12
+                spacing: 6
 
                 Text {
-                    text: ":: EXPORT LIBRARY SUMMARY REPORT ::"
-                    font.pixelSize: 11
+                    text: "EXPORT LIBRARY SUMMARY"
+                    font.pixelSize: 10
                     font.weight: Font.Bold
-                    color: "#92969D"
+                    color: "#62666D"
                 }
 
                 RowLayout {
@@ -43,20 +59,21 @@ Item {
             }
         }
 
+        // Process Log Console
         GlassCard {
             Layout.fillWidth: true
             Layout.fillHeight: true
 
             ColumnLayout {
                 anchors.fill: parent
-                anchors.margins: 16
+                anchors.margins: 12
                 spacing: 8
 
                 Text {
-                    text: ":: PROCESS LOG CONSOLE ::"
-                    font.pixelSize: 11
+                    text: "LIVE PROCESS LOG STREAM"
+                    font.pixelSize: 10
                     font.weight: Font.Bold
-                    color: "#92969D"
+                    color: "#62666D"
                 }
 
                 ScrollView {
@@ -69,8 +86,8 @@ Item {
                         font.family: "Courier New, monospace"
                         font.pixelSize: 11
                         color: "#34D399"
-                        background: Rectangle { color: "#0B0C0E"; radius: 4 }
-                        text: "[LOG START] Initialized LyricForge Pro Application Engine...\nReady."
+                        background: Rectangle { color: "#0B0C0E"; radius: 4; border.color: "#272A2F" }
+                        text: "[LOG START] Initialized LyricForge Pro Engine...\n[SYSTEM] Ready."
                     }
                 }
             }
