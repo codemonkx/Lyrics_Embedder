@@ -34,6 +34,7 @@ ApplicationWindow {
         sequence: "Ctrl+R"
         onActivated: {
             if (typeof libraryService !== "undefined" && libraryService && typeof configManager !== "undefined" && configManager) {
+                toastNotification.show("Scanning music library...", "info", 3000)
                 libraryService.startScan(
                     configManager.get("music_dir", ""),
                     configManager.get("lyrics_dir", ""),
@@ -193,6 +194,15 @@ ApplicationWindow {
                 SettingsPage { id: settingsPage }
             }
         }
+    }
+
+    // Floating Toast Notification Overlay
+    ToastNotification {
+        id: toastNotification
+        anchors.bottom: parent.bottom
+        anchors.right: parent.right
+        anchors.margins: 24
+        z: 999
     }
 
     // 8-Directional Frameless Border Edge Resize Handles

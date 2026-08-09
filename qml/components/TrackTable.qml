@@ -6,6 +6,7 @@ Rectangle {
     id: tableRoot
     property var tracksModel: libraryService ? libraryService.tracks : []
     property var selectedTrack: null
+    property int currentFilter: 0
     signal trackSelected(var track)
 
     color: "#121417"
@@ -13,14 +14,31 @@ Rectangle {
     border.width: 1
     radius: 6
 
+    // Filter tracks based on tab selection (0: All, 1: Matched, 2: Unmatched, 3: Suspicious)
+    function getFilteredTracks() {
+        if (!tableRoot.tracksModel) return []
+        if (tableRoot.currentFilter === 1) return tableRoot.tracksModel.filter(function(t){ return t.lyric_id !== null })
+        if (tableRoot.currentFilter === 2) return tableRoot.tracksModel.filter(function(t){ return t.lyric_id === null })
+        if (tableRoot.currentFilter === 3) return tableRoot.tracksModel.filter(function(t){ return t.legit === 0 })
+        return tableRoot.tracksModel
+    }
+
     ColumnLayout {
         anchors.fill: parent
         spacing: 0
 
+        // Filter Bar Header
+        FilterBar {
+            Layout.fillWidth: true
+            onFilterChanged: function(idx) {
+                tableRoot.currentFilter = idx
+            }
+        }
+
         // Column Headers Bar
         Rectangle {
             Layout.fillWidth: true
-            Layout.preferredHeight: 32
+            Layout.preferredHeight: 30
             color: "#0B0C0E"
             border.color: "#272A2F"
             border.width: 1
@@ -31,7 +49,7 @@ Rectangle {
                 anchors.rightMargin: 16
                 spacing: 12
 
-                Text { text: "TITLE"; font.pixelSize: 10; font.weight: Font.Bold; color: "#62666D"; Layout.fillWidth: true }
+                Text { text: "TRACK / TITLE"; font.pixelSize: 10; font.weight: Font.Bold; color: "#62666D"; Layout.fillWidth: true }
                 Text { text: "ARTIST"; font.pixelSize: 10; font.weight: Font.Bold; color: "#62666D"; Layout.preferredWidth: 160 }
                 Text { text: "ALBUM"; font.pixelSize: 10; font.weight: Font.Bold; color: "#62666D"; Layout.preferredWidth: 140 }
                 Text { text: "FORMAT"; font.pixelSize: 10; font.weight: Font.Bold; color: "#62666D"; Layout.preferredWidth: 80 }
@@ -46,12 +64,19 @@ Rectangle {
             Layout.fillWidth: true
             Layout.fillHeight: true
             clip: true
-            model: tableRoot.tracksModel
+            model: tableRoot.getFilteredTracks()
+
+            ScrollBar.vertical: ScrollBar {
+                active: true
+                policy: ScrollBar.AsNeeded
+            }
 
             delegate: Rectangle {
                 width: listView.width
-                height: 38
+                height: 40
                 color: modelData === tableRoot.selectedTrack ? "#181B1F" : (rowMouse.containsMouse ? "#15181D" : "transparent")
+
+                Behavior on color { NumberAnimation { duration: 120 } }
 
                 Rectangle {
                     anchors.bottom: parent.bottom
@@ -70,9 +95,21 @@ Rectangle {
 
                 RowLayout {
                     anchors.fill: parent
-                    anchors.leftMargin: 16
+                    anchors.leftMargin: 12
                     anchors.rightMargin: 16
                     spacing: 12
+
+                    // Album Art / Audio Icon Vinyl Badge
+                    Rectangle {
+                        width: 24; height: 24; radius: 4
+                        color: "#0B0C0E"
+                        border.color: "#272A2F"
+                        Text {
+                            anchors.centerIn: parent
+                            text: "🎵"
+                            font.pixelSize: 10
+                        }
+                    }
 
                     // Title
                     Text {
