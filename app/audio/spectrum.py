@@ -1,15 +1,16 @@
 import io
+import urllib.parse
 import matplotlib
 matplotlib.use("Agg")  # Non-GUI backend for fast in-memory rendering
 import matplotlib.pyplot as plt
 import numpy as np
+from pathlib import Path
 from PySide6.QtGui import QImage, QPixmap
 from PySide6.QtQuick import QQuickImageProvider
 from PySide6.QtCore import QSize
 
 from app.audio.decoder import AudioDecoder
 from app.audio.fft import FFTAnalyzer
-from app.core.constants import COLOR_BG_BASE, COLOR_ACCENT_RED, COLOR_SUCCESS, COLOR_BORDER_SUBTLE
 from app.core.logging import logger
 
 class SpectrumImageProvider(QQuickImageProvider):
@@ -23,7 +24,9 @@ class SpectrumImageProvider(QQuickImageProvider):
         super().__init__(QQuickImageProvider.Pixmap)
 
     def requestPixmap(self, id: str, size: QSize, requestedSize: QSize) -> QPixmap:
-        file_path = id.replace("%2F", "/").replace("%5C", "\\")
+        # Decode URL-encoded characters (e.g. %3A -> ':', %5C -> '\', %2F -> '/')
+        raw_path = urllib.parse.unquote(id)
+        file_path = str(Path(raw_path).resolve())
         
         # Check in-memory cache
         if file_path in self._cache:
@@ -57,7 +60,7 @@ class SpectrumImageProvider(QQuickImageProvider):
             ax.set_xlim(0, sr / 2000.0)
             ax.set_ylim(-100, 5)
         else:
-            ax.text(0.5, 0.5, f"Spectrum Unavailable\n({msg})", color='#92969D', ha='center', va='center', fontsize=10)
+            ax.text(0.5, 0.5, f"Spectrum Unavailable\n({msg})", color='#92969D', ha='center', va='center', fontsize=9)
             ax.set_xlim(0, 22)
             ax.set_ylim(-100, 0)
 
