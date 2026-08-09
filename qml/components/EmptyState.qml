@@ -1,25 +1,25 @@
 import QtQuick
 import QtQuick.Controls
+import QtQuick.Layouts
 
 Item {
     id: emptyRoot
     property string iconSymbol: "🔴"
     property string title: "NO MUSIC LIBRARY SCANNED"
-    property string subtitle: "Select your music library folder to scan audio tracks and match lyrics."
-    property string buttonText: "CHOOSE MUSIC FOLDER"
+    property string subtitle: "Select your local music library and lyrics directory to start automatic matching and audio inspection."
     signal actionClicked()
 
-    implicitWidth: 400
-    implicitHeight: 300
+    implicitWidth: 420
+    implicitHeight: 280
 
     Column {
         anchors.centerIn: parent
-        spacing: 14
-        width: Math.min(parent.width - 40, 420)
+        spacing: 12
+        width: Math.min(parent.width - 40, 440)
 
         Text {
             text: emptyRoot.iconSymbol
-            font.pixelSize: 36
+            font.pixelSize: 32
             anchors.horizontalCenter: parent.horizontalCenter
         }
 
@@ -27,14 +27,14 @@ Item {
             text: emptyRoot.title
             font.pixelSize: 13
             font.weight: Font.Black
-            font.letterSpacing: 1.2
+            font.letterSpacing: 1.0
             color: "#F2F2F2"
             anchors.horizontalCenter: parent.horizontalCenter
         }
 
         Text {
             text: emptyRoot.subtitle
-            font.pixelSize: 12
+            font.pixelSize: 11
             color: "#92969D"
             horizontalAlignment: Text.AlignHCenter
             wrapMode: Text.WordWrap
@@ -42,13 +42,30 @@ Item {
             anchors.horizontalCenter: parent.horizontalCenter
         }
 
-        Item { width: 1; height: 8 }
+        Item { width: 1; height: 4 }
 
-        PillButton {
-            text: emptyRoot.buttonText
-            isPrimary: true
+        Row {
+            spacing: 12
             anchors.horizontalCenter: parent.horizontalCenter
-            onClicked: emptyRoot.actionClicked()
+
+            PillButton {
+                text: "📁 SELECT MUSIC FOLDER"
+                isPrimary: true
+                onClicked: {
+                    if (typeof libraryService !== "undefined" && libraryService) {
+                        libraryService.browseFolder("music")
+                    }
+                }
+            }
+
+            PillButton {
+                text: "📝 SELECT LYRICS FOLDER"
+                onClicked: {
+                    if (typeof libraryService !== "undefined" && libraryService) {
+                        libraryService.browseFolder("lyrics")
+                    }
+                }
+            }
         }
     }
 }

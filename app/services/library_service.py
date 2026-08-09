@@ -1,5 +1,7 @@
 from typing import List, Dict, Any
 from PySide6.QtCore import QObject, Signal, Slot, Property
+from PySide6.QtWidgets import QFileDialog, QApplication
+
 from app.database.database import DatabaseManager
 from app.database.repositories import TrackRepository, SettingsRepository
 from app.models.track import Track
@@ -12,6 +14,7 @@ from app.core.logging import logger
 class LibraryService(QObject):
     tracksChanged = Signal()
     statsChanged = Signal()
+    pathsChanged = Signal()
     scanProgress = Signal(int, str)
     scanFinished = Signal()
 
@@ -54,6 +57,7 @@ class LibraryService(QObject):
             )
             self.tracksChanged.emit()
             self.statsChanged.emit()
+            self.pathsChanged.emit()
         finally:
             session.close()
 
@@ -76,6 +80,36 @@ class LibraryService(QObject):
     @Property(int, notify=statsChanged)
     def suspiciousTracks(self) -> int:
         return self._stats.suspicious_songs
+
+    @Property(str, notify=pathsChanged)
+    def musicDir(self) -> str:
+        return config_manager.get("music_dir", "")
+
+    @Property(str, notify=pathsChanged)
+    def lyricsDir(self) -> str:
+        return config_manager.get("lyrics_dir", "")
+
+    @Slot(str, result=str)
+    def browseFolder(self, folder_type: str) -> str:
+        """Opens native OS folder chooser dialog for music or lyrics directory."""
+        dialog = QFileDialog()
+        dialog.setFileMode(QFileDialog.Directory)
+        dialog.setWindowTitle("Select Music Directory" if folder_type == "music" else "Select Lyrics Directory")
+        if dialog.exec():
+            selected = dialog.selectedFiles()[0]
+            if folder_type == "music":
+                config_manager.set("music_dir", selected)
+            elif folder_type == "lyrics":
+                config_manager.set("lyrics_dir", selected)
+            self.pathsChanged.emit()
+            
+            # Automatically start scan if both folders are set
+            m_dir = config_manager.get("music_dir", "")
+            l_dir = config_manager.get("lyrics_dir", "")
+            if m_dir:
+                self.startScan(m_dir, l_dir)
+            return selected
+        return ""
 
     @Slot(str, str, float, bool)
     def startScan(self, music_dir: str, lyrics_dir: str, threshold: float = 60.0, verify_audio: bool = True):
