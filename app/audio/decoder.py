@@ -16,17 +16,33 @@ class AudioDecoder:
         return shutil.which("ffmpeg") is not None
 
     @classmethod
-    def decode_to_pcm(cls, file_path: str, start_time: int = 30, duration: int = 10) -> Tuple[Optional[int], Optional[np.ndarray], str]:
+    def decode_to_pcm(cls, file_path: str, start_time: int = 0, duration: int = 30) -> Tuple[Optional[int], Optional[np.ndarray], str]:
         """
-        Decodes a segment of an audio file to PCM WAV using FFmpeg.
+        Decodes a segment of an audio file to PCM WAV using native WAV reader or FFmpeg.
         Returns: (sample_rate, pcm_data_array, status_message)
         """
         if not os.path.exists(file_path):
             return None, None, f"File does not exist: {file_path}"
 
+        # 1. Direct native WAV fallback for zero-dependency decoding
+        if file_path.lower().endswith(".wav"):
+            try:
+                sample_rate, data = wavfile.read(file_path)
+                if len(data) > 0:
+                    if len(data.shape) > 1:
+                        data = data[:, 0]  # Mono conversion
+                    # Sample up to duration seconds
+                    max_samples = sample_rate * duration
+                    if len(data) > max_samples:
+                        data = data[:max_samples]
+                    return sample_rate, data, "OK"
+            except Exception as e:
+                logger.debug(f"Direct WAV read failed: {e}")
+
+        # 2. Check FFmpeg availability for FLAC, MP3, M4A, OGG, AAC
         if not cls.is_ffmpeg_available():
             logger.warning("FFmpeg binary is not found in system PATH. Audio spectral decoding unavailable.")
-            return None, None, "FFmpeg unavailable on host system."
+            return None, None, "FFmpeg unavailable on host system. Install FFmpeg or convert to .wav format."
 
         temp_wav = tempfile.mktemp(suffix=".wav")
         try:
@@ -41,12 +57,6 @@ class AudioDecoder:
             subprocess.run(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, check=True)
             
             sample_rate, data = wavfile.read(temp_wav)
-            if len(data) == 0:
-                # Fallback to start_time = 0 if sample at 30s failed
-                cmd[3] = '0'
-                subprocess.run(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, check=True)
-                sample_rate, data = wavfile.read(temp_wav)
-
             if len(data) > 0:
                 return sample_rate, data, "OK"
             return None, None, "Failed to extract valid PCM audio samples."

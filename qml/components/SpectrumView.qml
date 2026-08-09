@@ -27,7 +27,7 @@ GlassCard {
             width: parent.width
             height: parent.height - 28
             fillMode: Image.PreserveAspectFit
-            source: spectrumContainer.filePath ? "image://spectrum/" + encodeURIComponent(spectrumContainer.filePath) : ""
+            source: spectrumContainer.filePath ? "image://spectrum/" + encodeURIComponent(spectrumContainer.filePath) + "?t=" + Date.now() : ""
             visible: spectrumContainer.filePath.length > 0
 
             Text {

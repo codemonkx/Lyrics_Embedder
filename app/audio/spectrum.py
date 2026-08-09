@@ -24,8 +24,9 @@ class SpectrumImageProvider(QQuickImageProvider):
         super().__init__(QQuickImageProvider.Pixmap)
 
     def requestPixmap(self, id: str, size: QSize, requestedSize: QSize) -> QPixmap:
-        # Decode URL-encoded characters (e.g. %3A -> ':', %5C -> '\', %2F -> '/')
-        raw_path = urllib.parse.unquote(id)
+        # Strip cache-buster query parameters if present (e.g. file_path?t=12345)
+        clean_id = id.split('?')[0]
+        raw_path = urllib.parse.unquote(clean_id)
         file_path = str(Path(raw_path).resolve())
         
         # Check in-memory cache
